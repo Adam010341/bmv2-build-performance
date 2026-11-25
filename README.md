@@ -21,20 +21,78 @@ formatting log messages.
 
 ![Capacity of the router program for five setups](figures/capacity-by-build.png)
 
+*Table 1. Capacity C (median of 5 instances, 95 % bootstrap CI) of the router program for 64-byte
+frames across eight build configurations.*
+
+| build | optimisation | logging macros | event logger | C (kpps) | 95 % CI |
+|---|:---:|:---:|:---:|---:|---:|
+| bmv2's CMake default | `-O0` | on | on | 5.92 | [5.89, 5.94] |
+| official Docker image | `-O0` | on | on | 5.89 | [5.87, 5.91] |
+| autotools default | `-O2` | on | on | 24.94 | [24.78, 24.97] |
+| custom CMake build | `-O2` | on | off | 25.03 | [24.80, 25.16] |
+| custom CMake build | `-O0` | off | off | 49.08 | [48.89, 49.43] |
+| custom CMake build | `-O2` | off | off | 214.75 | [213.65, 225.81] |
+| recommended build, built with CMake | `-O3` | off | off | 220.02 | [214.74, 227.18] |
+| recommended build | `-O3` | off | off | 216.26 | [212.31, 224.66] |
+
+Table 1 also shows that `-O3` adds nothing over `-O2`, and that the event logger costs about 1 % when
+no program reads its events. Turning on the three recording options that the P4 tutorials use
+(`--log-console`, `--pcap`, `--nanolog`) lowers the capacity of the CMake default further, from 5.92
+to 4.47 kpps; most of this cost comes from console logging.
+
 **Comparisons between programs.** The build also changes comparisons between P4 programs. In 18 of
 the 78 pairs of the 13 programs that we tested, the program that is faster with one build is slower
-with the other. Programs from published papers gain as well: three of them forward 36, 47 and 5.4
-times as many frames with the recommended build as with the CMake default.
+with the other. To see whether the gap also holds for programs that researchers actually evaluate, we ran three
+programs from papers in our census with the authors' table entries (Table 2). The port-knocking and
+P-IOTA programs gain about as much from the recommended build as our router program, but the GNN
+program gains only 5.4x, because it spends 29 µs per packet even in the recommended build.
 
-**How papers report bmv2 performance.** None of the 253 papers reports its full build configuration
-in the text, and for 200 of them neither the text nor a linked repository mentions the build. Only
-60 papers report packets per second, and only 6 show by measurement that the traffic generator or
-the receiving host was not the bottleneck. The figure below plots the largest bmv2 rate in the 35
+*Table 2. Capacity of the published programs and of our router program for 64-byte frames (median
+of 5 instances).*
+
+| program | CMake default (kpps) | recommended build (kpps) | ratio | time per packet, recommended build (µs) |
+|---|---:|---:|---:|---:|
+| router program (ours) | 5.92 | 216 | 36.5x | 4.6 |
+| port knocking [1] | 2.18 | 78.1 | 35.9x | 12.8 |
+| P-IOTA DDoS detection [2] | 1.61 | 75.3 | 46.8x | 13.3 |
+| GNN ECN marking [3] | 6.35 | 34.0 | 5.4x | 29.4 |
+
+**How papers report bmv2 performance.** We searched OpenAlex, arXiv and Semantic Scholar, found 2588
+candidate papers, screened them down to 415, and kept the 253 papers that report at least one
+performance figure measured on bmv2. For each paper we recorded the 14 setup fields of Table 3.
+
+*Table 3. What 253 papers that report bmv2 figures state about their setup.*
+
+| | field | reported | partial | not reported |
+|---|---|---:|---:|---:|
+| F1 | target binary named (`simple_switch`, ...) | 40 | – | 213 |
+| F2 | bmv2 release or commit | 8 | 4 | 241 |
+| F3 | build configuration | 0 | 11 | 242 |
+| F4 | logging on or off at run time | 6 | 11 | 236 |
+| F5 | how bmv2 was installed | 32 | – | 221 |
+| F6 | P4 program | 150 | 95 | 8 |
+| F7 | host CPU model | 83 | 71 | 99 |
+| F8 | bmv2 run directly on the host, in a VM or in a container | 90 | – | 163 |
+| F9 | emulation layer (Mininet, ...) | 223 | – | 30 |
+| F10 | traffic tool (iperf3, ...) | 146 | – | 107 |
+| F11 | packet size, frame or payload | 23 | 48 | 182 |
+| F12 | packets per second | 60 | – | 193 |
+| F13 | number of times each experiment was repeated, and the spread of its results | 38 | 88 | 127 |
+| F14 | measurement showing that the traffic tools were not the bottleneck | 6 | 51 | 196 |
+
+No paper reports its full build configuration in the text (F3). Even counting the 77 linked
+repositories, for 200 of the 253 papers neither the text nor a linked repository mentions how bmv2
+was built. Only 60 papers report packets per second, and only 6 show by measurement that the
+traffic generator or the receiving host was not the bottleneck. The figure below plots the largest bmv2 rate in the 35
 of these 60 papers whose figures we could convert. In 22 of them, this rate is below what even
 bmv2's CMake default forwards on our machine. A reader therefore cannot tell from such a figure
 whether bmv2, the link or the traffic source was the bottleneck.
 
 ![Largest bmv2 rate reported by 35 papers](figures/reported-rates.png)
+
+*Figure. The largest bmv2 packet rate reported by each of 35 census papers. Vertical lines: the
+capacity of our IPv4 router program with 64-byte frames on our machine for the CMake default, the
+autotools default and the recommended build.*
 
 ## Reporting Checklist
 
@@ -109,3 +167,12 @@ python3 -m unittest discover -s tests -p 'test_*.py'
 
 A measurement run needs a dedicated machine, the bmv2 builds from `harness/builds`, and the
 one-time setup in `harness/priv/setup_testbed.sh`.
+
+## References
+
+1. A. Almaini et al. Lightweight edge authentication for software defined networks. *Computing*
+   103(2), 2021. https://doi.org/10.1007/s00607-020-00835-4
+2. A. Al Sadi et al. P-IOTA: A cloud-based geographically distributed threat alert system that
+   leverages P4 and IOTA. *Sensors* 23(6), 2023. https://doi.org/10.3390/s23062955
+3. I. P. Lamb et al. Distributed graph neural networks in programmable data planes. *NOMS 2025*.
+   https://doi.org/10.1109/NOMS57970.2025.11073693
