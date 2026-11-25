@@ -2,7 +2,7 @@
 
 bmv2 is the reference software switch for P4, and hundreds of research papers report throughput,
 latency or loss measured on it. Those figures depend heavily on how bmv2 was compiled and started,
-but papers almost never say.
+but papers almost never mention these configurations.
 
 This project does two things:
 
