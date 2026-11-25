@@ -1,0 +1,13 @@
+#!/usr/bin/env python3
+"""fake bmnic -- test double of harness/src/bmnic.c for the dry run.
+
+The fake network has no offloads to turn off: checks the argument as the real tool does and
+reports every offload off, in the real tool's JSON line.
+"""
+import json
+import sys
+
+if len(sys.argv) != 2 or len(sys.argv[1]) >= 16:
+    print("usage: bmnic IFNAME", file=sys.stderr)
+    sys.exit(2)
+print(json.dumps({"tool": "bmnic", "if": sys.argv[1], "rx_csum": 0, "tx_csum": 0, "sg": 0, "tso": 0}))

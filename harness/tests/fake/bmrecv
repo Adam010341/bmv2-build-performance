@@ -1,0 +1,178 @@
+#!/usr/bin/env python3
+"""fake bmrecv -- test double of harness/src/bmrecv.c for the dry run.
+
+Same options, validation, exit codes and READY handshake on stderr; the same one-line JSON report
+(same keys, order and printf formats). It is a packet socket on FAKE_NS/--if: it sees every frame
+there, received or sent. Frames with the bmgen marker are accounted per flow (rx, max_seq) and in
+the latency histogram (kernel-receive time minus the generator stamp, here: the time the fake
+switch delivered the batch minus the time the fake bmgen sent it); other frames are `foreign`;
+frames of another run id are `stale` when --run-id is given. The fake ring never drops, so
+ring_packets = rx + foreign + stale and ring_drops = 0, as PACKET_STATISTICS reports for a ring
+that kept up (tp_packets includes tp_drops on read). --pcap-in is not faked.
+"""
+import math
+import os
+import sys
+import time
+
+sys.path.insert(0, os.environ.get("FAKE_HOME", os.path.dirname(os.path.abspath(__file__))))
+import fakenet  # noqa: E402
+
+USAGE = "usage: bmrecv --if IFACE [--duration S] [--run-id N] | --pcap-in FILE [--run-id N]\n"
+NBUCKET = 64
+
+
+def usage():
+    sys.stderr.write(USAGE)
+    sys.exit(2)
+
+
+def parse(argv):
+    o, i = {}, 0
+    while i < len(argv):
+        a = argv[i]
+        if not a.startswith("--"):
+            usage()
+        name, eq, val = a[2:].partition("=")
+        if name not in ("if", "duration", "pcap-in", "run-id"):
+            usage()
+        if not eq:
+            i += 1
+            if i >= len(argv):
+                usage()
+            val = argv[i]
+        o[name] = val
+        i += 1
+    return o
+
+
+def bucket(ns):
+    if ns == 0:
+        return 0
+    b = int(2.0 * math.log2(ns))
+    return 0 if b < 0 else (NBUCKET - 1 if b >= NBUCKET else b)
+
+
+class Acc:
+    def __init__(self, run_filter):
+        self.run_filter = run_filter
+        self.flows = {}                 # flow -> [rx, max_seq, ooo, dup]
+        self.hist = [0] * NBUCKET
+        self.foreign = self.stale = self.rx = self.lat_n = self.lat_neg = 0
+        self.lat_sum = 0.0
+        self.ring = 0
+
+    def add(self, b):
+        n = b["n"]
+        self.ring += n
+        if b["proto"] != "bm":
+            self.foreign += n
+            return
+        if self.run_filter >= 0 and b["run"] != self.run_filter:
+            self.stale += n
+            return
+        F, i0 = b["nflows"], b["i0"]
+        for f in (range(F) if n >= F else {(i0 + j) % F for j in range(n)}):
+            first = i0 + ((f - i0) % F)          # first index in [i0, i0+n) with i % F == f
+            if first >= i0 + n:
+                continue
+            cnt = (i0 + n - 1 - first) // F + 1
+            last_seq = (first + (cnt - 1) * F) // F
+            st = self.flows.setdefault(f, [0, -1, 0, 0])
+            first_seq = first // F
+            if first_seq <= st[1]:
+                st[2] += 1                          # an out-of-order (or duplicate) arrival
+            st[0] += cnt
+            st[1] = max(st[1], last_seq)
+        self.rx += n
+        rx_ns = b.get("t_rx", time.time_ns())
+        if rx_ns >= b["t"]:
+            d = rx_ns - b["t"]
+            self.hist[bucket(d)] += n
+            self.lat_sum += float(d) * n
+            self.lat_n += n
+        else:
+            self.lat_neg += n
+
+    def pct(self, q):
+        tot = sum(self.hist)
+        if not tot:
+            return -1.0
+        acc = 0
+        for i, h in enumerate(self.hist):
+            acc += h
+            if acc >= q * tot:
+                return 2.0 ** ((i + 1) / 2.0)
+        return -1.0
+
+    def report(self, src, secs):
+        maxflow = max((f for f, st in self.flows.items() if st[0]), default=-1)
+        out = ('{"tool":"bmrecv","source":"%s","duration_s":%.6f,"rx":%d,"foreign":%d,"stale":%d,"skipped":0,'
+               % (src, secs, self.rx, self.foreign, self.stale))
+        out += ('"run_id_filter":%d,' % self.run_filter) if self.run_filter >= 0 else '"run_id_filter":null,'
+        out += ('"ring_packets":%d,"ring_drops":%d,"lat_n":%d,"lat_negative":%d,'
+                '"lat_mean_us":%.2f,"lat_p50_us_le":%.2f,"lat_p99_us_le":%.2f,"lat_p999_us_le":%.2f,"flows":['
+                % (self.ring, 0, self.lat_n, self.lat_neg,
+                   self.lat_sum / self.lat_n / 1e3 if self.lat_n else -1,
+                   self.pct(0.5) / 1e3, self.pct(0.99) / 1e3, self.pct(0.999) / 1e3))
+        parts = []
+        for i in range(maxflow + 1):
+            st = self.flows.get(i, [0, -1, 0, 0])
+            parts.append('{"flow":%d,"rx":%d,"max_seq":%d,"ooo":%d,"dup":%d}'
+                         % (i, st[0], st[1] if st[0] else -1, st[2], st[3]))
+        out += ",".join(parts) + '],"lat_hist_halfoctave_ns":['
+        out += ",".join(str(h) for h in self.hist) + "]}\n"
+        return out
+
+
+def main():
+    o = parse(sys.argv[1:])
+    run_filter = -1
+    if "run-id" in o:
+        v = o["run-id"]
+        if not v or not v.isdigit() or int(v) > 65535:
+            usage()
+        run_filter = int(v)
+    if "pcap-in" in o:
+        fakenet.die("bmrecv (fake)", "--pcap-in is not faked", 3)
+    ifname = o.get("if")
+    if not ifname:
+        usage()
+    try:
+        duration = float(o.get("duration", "0"))
+    except ValueError:
+        duration = 0.0
+    ns = os.environ["FAKE_NS"]
+    if not fakenet.has_iface(ns, ifname):
+        sys.stderr.write(f"no interface {ifname}\n")
+        sys.exit(1)
+    fakenet.register_pid()
+    stop = fakenet.Stop()
+    with fakenet.txn() as s:
+        sid = fakenet.open_sock(s, ns, ifname, "packet")
+    acc = Acc(run_filter)
+    t0 = time.monotonic()
+    sys.stderr.write("READY\n")
+    sys.stderr.flush()
+    while not stop.flag:
+        if duration > 0 and time.monotonic() - t0 >= duration:
+            break
+        with fakenet.txn() as s:
+            batches = fakenet.pop(s, sid)
+        for b in batches:
+            acc.add(b)
+        time.sleep(0.05)
+    t1 = time.monotonic()
+    time.sleep(0.05)                                   # final drain, as the C ring drain
+    with fakenet.txn() as s:
+        batches = fakenet.pop(s, sid)
+        s["socks"].pop(sid, None)
+    for b in batches:
+        acc.add(b)
+    sys.stdout.write(acc.report(ifname, t1 - t0))
+    sys.stdout.flush()
+    fakenet.unregister_pid()
+
+
+if __name__ == "__main__":
+    main()

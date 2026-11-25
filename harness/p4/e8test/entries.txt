@@ -1,0 +1,2 @@
+# e8test entries (simple_switch_CLI). bmgen's default destination 10.0.1.1 is forwarded p -> p ^ 1.
+table_add MyIngress.ipv4_fwd MyIngress.forward 10.0.1.1 =>

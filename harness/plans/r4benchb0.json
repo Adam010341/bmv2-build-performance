@@ -1,0 +1,199 @@
+{
+ "name": "R4-bench-b0",
+ "shuffle_seed": 114,
+ "harness_git": "92452ae",
+ "instances": [
+  {
+   "id": "r4-bench-cm-o0-L1-E1-l3-r0",
+   "build": "cm-o0-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 0,
+   "cpu_mode": "bench"
+  },
+  {
+   "id": "r4-bench-cm-o0-L1-E0-l3-r0",
+   "build": "cm-o0-L1-E0",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 0,
+   "cpu_mode": "bench"
+  },
+  {
+   "id": "r4-bench-cm-o0-L0-E1-l3-r0",
+   "build": "cm-o0-L0-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 0,
+   "cpu_mode": "bench"
+  },
+  {
+   "id": "r4-bench-cm-o0-L0-E0-l3-r0",
+   "build": "cm-o0-L0-E0",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 0,
+   "cpu_mode": "bench"
+  },
+  {
+   "id": "r4-bench-cm-o3-L1-E1-l3-r0",
+   "build": "cm-o3-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 0,
+   "cpu_mode": "bench"
+  },
+  {
+   "id": "r4-bench-cm-o3-L1-E0-l3-r0",
+   "build": "cm-o3-L1-E0",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 0,
+   "cpu_mode": "bench"
+  },
+  {
+   "id": "r4-bench-cm-o3-L0-E1-l3-r0",
+   "build": "cm-o3-L0-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 0,
+   "cpu_mode": "bench"
+  },
+  {
+   "id": "r4-bench-cm-o3-L0-E0-l3-r0",
+   "build": "cm-o3-L0-E0",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 0,
+   "cpu_mode": "bench"
+  },
+  {
+   "id": "r4-bench-cm-o0-L1-E1-min-r0",
+   "build": "cm-o0-L1-E1",
+   "program": "min",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 0,
+   "cpu_mode": "bench"
+  },
+  {
+   "id": "r4-bench-cm-o0-L1-E1-exact_8-r0",
+   "build": "cm-o0-L1-E1",
+   "program": "exact_8",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 0,
+   "cpu_mode": "bench"
+  },
+  {
+   "id": "r4-bench-cm-o3-L0-E0-min-r0",
+   "build": "cm-o3-L0-E0",
+   "program": "min",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 0,
+   "cpu_mode": "bench"
+  },
+  {
+   "id": "r4-bench-cm-o3-L0-E0-exact_8-r0",
+   "build": "cm-o3-L0-E0",
+   "program": "exact_8",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 0,
+   "cpu_mode": "bench"
+  }
+ ]
+}

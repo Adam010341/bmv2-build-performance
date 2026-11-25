@@ -1,0 +1,29 @@
+#!/usr/bin/env python3
+"""fake ld-linux-x86-64.so.2 -- stands in for the dynamic loader of an extracted docker rootfs
+(bench.py runs docker:/docker-grpc: builds as  ld.so --library-path DIRS BINARY ARGS...).
+
+Checks the invocation the way ld.so would (--library-path takes one argument; the program must
+exist and be a regular file) and then execs the program. Unlike the real loader it replaces
+itself, so /proc/<pid>/cmdline becomes [python3, BINARY, ARGS...] instead of
+[ld.so, --library-path, DIRS, BINARY, ARGS...]; both keep BINARY within argv[:4], where
+bench.Switch.start looks for it.
+"""
+import os
+import sys
+
+args = sys.argv[1:]
+while args and args[0].startswith("--"):
+    if args[0] in ("--library-path", "--preload", "--audit", "--argv0"):
+        if len(args) < 2:
+            sys.exit(f"{sys.argv[0]}: missing program name")
+        args = args[2:]
+    elif args[0] in ("--inhibit-cache", "--list", "--verify"):
+        args = args[1:]
+    else:
+        sys.exit(f"{sys.argv[0]}: unrecognized option '{args[0]}'")
+if not args:
+    sys.exit(f"{sys.argv[0]}: missing program name")
+prog = args[0]
+if not os.path.isfile(prog):
+    sys.exit(f"{prog}: error while loading shared libraries: {prog}: cannot open shared object file")
+os.execv(prog, args)

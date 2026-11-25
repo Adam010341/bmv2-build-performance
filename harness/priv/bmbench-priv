@@ -1,0 +1,163 @@
+#!/bin/bash
+# bmbench-priv -- the only program the bmbench sudoers rule lets `adam` run as root.
+#
+# It does five things and nothing else:
+#   topo-up NPORTS        create netns bmb-sw (switch side) and one netns per host, bmb-h0 ..
+#                         bmb-h<N-1>, joined by veth pairs swK<->hK; IPv6 off, links up, fixed
+#                         MACs, hK = 10.0.0.(K+1)/24 (so iperf3 can run host to host THROUGH bmv2)
+#   topo-down             delete every bmb-* netns (and with them every veth)
+#   exec NS CPUS PATH ... run PATH inside netns NS, pinned to CPUS, as user adam holding ONLY
+#                         cap_net_raw + cap_net_admin (ambient). PATH must resolve under
+#                         /home/adam/bmbench/, or be one of the two whitelisted system tools.
+#   netdev NS             print /proc/net/dev as seen from inside NS (read-only)
+#   cpu-mode bench|restore|show
+#                         bench: governor=performance and turbo off on every CPU, saving the
+#                         previous state; restore puts the saved state back
+#   perf-paranoid 2|4     allow (2) or forbid (4, Ubuntu default) user-level perf profiling
+#   selftest              show the identity and capabilities that `exec` hands out
+#
+# Design rule: an experiment binary never runs as full root. `exec` drops to adam before the
+# target is executed and passes only the two network capabilities, scoped to the netns it runs
+# in. The caller can therefore stop the process itself (same uid) without sudo.
+#
+set -euo pipefail
+PATH=/usr/sbin:/usr/bin:/sbin:/bin
+export PATH
+umask 022
+
+VERSION=2
+RUN_USER=adam
+RUN_HOME=/home/adam
+ALLOWED_ROOT=/home/adam/bmbench
+NS_SW=bmb-sw
+STATE=/run/bmbench-cpu-state
+# System tools an experiment may run inside a netns, by exact path: iperf3 is the tool most
+# bmv2 papers measure with (the "what papers do" arm); trafgen is an independent generator used
+# to cross-check our own.
+SYSTEM_TOOLS=(/usr/bin/iperf3 /usr/sbin/trafgen)
+
+die() { echo "bmbench-priv: $*" >&2; exit 2; }
+[[ $EUID -eq 0 ]] || die "must run as root (through sudo)"
+[[ $# -ge 1 ]] || die "usage: bmbench-priv topo-up N | topo-down | exec NS CPUS PATH [ARGS...] | netdev NS | cpu-mode bench|restore|show | perf-paranoid 2|4 | selftest"
+
+ns_exists() { [[ -e "/run/netns/$1" ]]; }
+valid_ns() { [[ "$1" =~ ^bmb-(sw|h[0-7])$ ]] || die "netns must be bmb-sw or bmb-h0..bmb-h7, got '$1'"; }
+all_ns() { ls /run/netns 2>/dev/null | grep -E '^bmb-(sw|h[0-7])$' || true; }
+valid_cpus() { [[ "$1" =~ ^[0-9]+([,-][0-9]+)*$ ]] || die "bad cpu list '$1'"; }
+
+drop_and_exec() {  # $1=ns $2=cpus $3=path, rest = args; never returns
+    local ns="$1" cpus="$2" path="$3"; shift 3
+    # Every program after `env -i` is named by absolute path: env looks commands up in the PATH
+    # it was just given, which has no sbin (v1 named bare `capsh` and every exec failed with
+    # "env: 'capsh': No such file or directory").
+    exec /usr/bin/nsenter --net="/run/netns/$ns" -- \
+        /usr/bin/taskset -c "$cpus" \
+        /usr/bin/env -i HOME="$RUN_HOME" USER="$RUN_USER" LOGNAME="$RUN_USER" LANG=C.UTF-8 \
+            PATH=/usr/local/bin:/usr/bin:/bin \
+        /usr/sbin/capsh --caps="cap_net_raw,cap_net_admin+eip cap_setpcap,cap_setuid,cap_setgid+ep" \
+              --keep=1 --user="$RUN_USER" --addamb=cap_net_raw,cap_net_admin \
+              -- -c 'exec "$0" "$@"' "$path" "$@"
+}
+
+cmd="$1"; shift
+case "$cmd" in
+topo-up)
+    n="${1:-}"; [[ "$n" =~ ^[2-8]$ ]] || die "topo-up wants NPORTS in 2..8"
+    [[ -z "$(all_ns)" ]] || die "bmb-* netns already exist; run topo-down first"
+    hosts=(); for ((k = 0; k < n; k++)); do hosts+=("bmb-h$k"); done
+    for ns in "$NS_SW" "${hosts[@]}"; do
+        ip netns add "$ns"
+        # IPv6 off BEFORE the links exist, so no router solicitation or DAD packet ever shows up
+        # in a counter we read.
+        ip netns exec "$ns" sysctl -qw net.ipv6.conf.all.disable_ipv6=1 net.ipv6.conf.default.disable_ipv6=1
+        ip -n "$ns" link set lo up
+    done
+    for ((k = 0; k < n; k++)); do
+        ip link add "sw$k" netns "$NS_SW" type veth peer name "h$k" netns "bmb-h$k"
+        ip -n "$NS_SW"  link set "sw$k" address "02:00:00:00:00:0$k"
+        ip -n "bmb-h$k" link set "h$k"  address "02:00:00:00:01:0$k"
+        ip -n "bmb-h$k" addr add "10.0.0.$((k + 1))/24" dev "h$k"
+        ip -n "$NS_SW"  link set "sw$k" up
+        ip -n "bmb-h$k" link set "h$k"  up
+    done
+    echo "topo-up: sw0..sw$((n - 1)) in $NS_SW <-> h0..h$((n - 1)) in bmb-h0..bmb-h$((n - 1))"
+    ;;
+topo-down)
+    for ns in $(all_ns); do ip netns del "$ns"; echo "deleted $ns"; done
+    true
+    ;;
+exec)
+    [[ $# -ge 3 ]] || die "exec NS CPUS PATH [ARGS...]"
+    ns="$1"; cpus="$2"; want="$3"; shift 3
+    valid_ns "$ns"; valid_cpus "$cpus"
+    [[ "$want" == /* ]] || die "PATH must be absolute"
+    path="$(realpath -e -- "$want")" || die "no such file: $want"
+    [[ -f "$path" && -x "$path" ]] || die "not an executable regular file: $path"
+    ok=no
+    [[ "$path" == "$ALLOWED_ROOT"/* ]] && ok=yes
+    for t in "${SYSTEM_TOOLS[@]}"; do [[ "$path" == "$t" ]] && ok=yes; done
+    [[ "$ok" == yes ]] || die "refusing $path: not under $ALLOWED_ROOT/ and not a whitelisted tool"
+    drop_and_exec "$ns" "$cpus" "$path" "$@"
+    ;;
+netdev)
+    ns="${1:-}"; valid_ns "$ns"
+    exec nsenter --net="/run/netns/$ns" -- cat /proc/net/dev
+    ;;
+cpu-mode)
+    mode="${1:-}"
+    case "$mode" in
+    show)
+        for c in /sys/devices/system/cpu/cpu[0-9]*; do
+            printf '%s %s\n' "${c##*/}" "$(cat "$c/cpufreq/scaling_governor" 2>/dev/null)"
+        done | sort -V | awk '{print $2}' | sort | uniq -c | sed 's/^/governor: /'
+        echo "no_turbo: $(cat /sys/devices/system/cpu/intel_pstate/no_turbo 2>/dev/null || echo n/a)"
+        ;;
+    bench)
+        if [[ ! -f "$STATE" ]]; then
+            { echo "no_turbo=$(cat /sys/devices/system/cpu/intel_pstate/no_turbo)"
+              for c in /sys/devices/system/cpu/cpu[0-9]*; do
+                  echo "${c##*/}=$(cat "$c/cpufreq/scaling_governor")"
+              done; } > "$STATE"
+        fi
+        for c in /sys/devices/system/cpu/cpu[0-9]*; do echo performance > "$c/cpufreq/scaling_governor"; done
+        echo 1 > /sys/devices/system/cpu/intel_pstate/no_turbo
+        echo "cpu-mode bench: governor=performance, turbo off (previous state in $STATE)"
+        ;;
+    restore)
+        [[ -f "$STATE" ]] || die "no saved state in $STATE"
+        while IFS='=' read -r key val; do
+            [[ "$val" =~ ^[a-z0-9]+$ ]] || continue
+            if [[ "$key" == no_turbo ]]; then
+                echo "$val" > /sys/devices/system/cpu/intel_pstate/no_turbo
+            elif [[ "$key" =~ ^cpu[0-9]+$ ]]; then
+                echo "$val" > "/sys/devices/system/cpu/$key/cpufreq/scaling_governor"
+            fi
+        done < "$STATE"
+        rm -f "$STATE"
+        echo "cpu-mode restored"
+        ;;
+    *) die "cpu-mode bench|restore|show" ;;
+    esac
+    ;;
+perf-paranoid)
+    v="${1:-}"; [[ "$v" == 2 || "$v" == 4 ]] || die "perf-paranoid 2|4"
+    sysctl -qw kernel.perf_event_paranoid="$v"
+    echo "kernel.perf_event_paranoid=$v"
+    ;;
+selftest)
+    echo "bmbench-priv version $VERSION"
+    [[ -n "$(all_ns)" ]] || echo "no bmb-* netns (run topo-up)"
+    # Goes through drop_and_exec itself, so it tests the exact path `exec` uses (v1's selftest
+    # called capsh directly and passed while every `exec` failed).
+    bad=0
+    for ns in $(all_ns); do
+        echo "== $ns"
+        ( drop_and_exec "$ns" 0 /bin/sh -c 'id; grep -E "^Cap(Prm|Eff|Amb)" /proc/self/status; /usr/bin/ip -br link' ) \
+            || { echo "== $ns: exec path FAILED"; bad=1; }
+    done
+    exit "$bad"
+    ;;
+*)
+    die "unknown subcommand '$cmd'"
+    ;;
+esac

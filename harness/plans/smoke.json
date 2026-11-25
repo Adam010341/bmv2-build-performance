@@ -1,0 +1,113 @@
+{
+ "name": "SMOKE",
+ "shuffle_seed": 99,
+ "harness_git": "c428577",
+ "instances": [
+  {
+   "id": "smoke-cm-o0-L1-E1",
+   "build": "cm-o0-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10,
+     "flows": 16,
+     "recv": true
+    },
+    {
+     "kind": "sat",
+     "frame": 1518,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    },
+    {
+     "kind": "rate",
+     "frame": 64,
+     "pps_frac_of_sat": 0.5,
+     "burst": 32,
+     "flows": 16,
+     "recv": true
+    },
+    {
+     "kind": "zl",
+     "frame": 64,
+     "burst": 1,
+     "duration": 5,
+     "lo": 500,
+     "hi": 2000000,
+     "threshold": 0.0
+    },
+    {
+     "kind": "iperf3",
+     "frame": 1518,
+     "flows": 2,
+     "ladder_pps": [
+      1000,
+      5000,
+      20000
+     ],
+     "duration": 5
+    }
+   ],
+   "block": 0,
+   "shuffle_trials": false
+  },
+  {
+   "id": "smoke-cm-o3-L0-E0",
+   "build": "cm-o3-L0-E0",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10,
+     "flows": 16,
+     "recv": true
+    },
+    {
+     "kind": "sat",
+     "frame": 1518,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    },
+    {
+     "kind": "rate",
+     "frame": 64,
+     "pps_frac_of_sat": 0.5,
+     "burst": 32,
+     "flows": 16,
+     "recv": true
+    },
+    {
+     "kind": "zl",
+     "frame": 64,
+     "burst": 1,
+     "duration": 5,
+     "lo": 500,
+     "hi": 2000000,
+     "threshold": 0.0
+    },
+    {
+     "kind": "iperf3",
+     "frame": 1518,
+     "flows": 2,
+     "ladder_pps": [
+      1000,
+      5000,
+      20000
+     ],
+     "duration": 5
+    }
+   ],
+   "block": 0,
+   "shuffle_trials": false
+  }
+ ]
+}

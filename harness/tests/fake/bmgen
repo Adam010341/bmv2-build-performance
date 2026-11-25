@@ -1,0 +1,200 @@
+#!/usr/bin/env python3
+"""fake bmgen -- test double of harness/src/bmgen.c for the dry run.
+
+Same options, validation and exit codes; the same one-line JSON report (same keys, same order,
+same number formats as the C printf). Frames are "sent" in real time on the fake network: every
+20 ms the frames due so far leave FAKE_NS/--if as one batch (tx there, rx on the veth peer).
+Schedule: --pps > 0 sends exactly the bursts the C loop sends (burst k is due at k*B/pps and the
+run stops at the first burst due at or after --duration); --pps 0 sends at config gen_max_pps
+(or gen_max_pps_if[IFACE]).
+The fake is never late and the kernel never refuses a frame (send_errors 0).
+--dump is not faked (tests/test_offline.sh covers it with the real binary).
+--tos BYTE (E8, AMENDMENT-9) is validated like the C tool does with strtol(optarg, &e, 0): a whole
+string that is a decimal, 0x hex or 0-prefixed octal integer 0..255, anything else exits 2. It
+changes no frame (the fake network carries counts, not headers). Every run appends the options it
+got to $FAKE_STATE/bmgen-args.jsonl (the dry-run check reads it: which generator fields reached bmgen).
+"""
+import json
+import math
+import os
+import sys
+import time
+
+sys.path.insert(0, os.environ.get("FAKE_HOME", os.path.dirname(os.path.abspath(__file__))))
+import fakenet  # noqa: E402
+
+USAGE = ("usage: bmgen --if IFACE --frame BYTES [--pps N] [--burst B] [--duration S] [--flows N]\n"
+         "             [--run-id N] [--dst-mac MAC] [--src-mac MAC] [--src-ip A.B.C.D] [--dst-ip A.B.C.D] [--tos BYTE]\n"
+         "             [--dump FILE --dump-count N]\n")
+OPTS = {"if", "frame", "pps", "burst", "duration", "flows", "dst-mac", "src-mac", "src-ip", "dst-ip",
+        "dump", "dump-count", "run-id", "tos"}
+
+
+def usage():
+    sys.stderr.write(USAGE)
+    sys.exit(2)
+
+
+def parse(argv):
+    """getopt_long with every option taking a required argument: --opt VAL or --opt=VAL."""
+    o, i = {}, 0
+    while i < len(argv):
+        a = argv[i]
+        if not a.startswith("--"):
+            usage()
+        name, eq, val = a[2:].partition("=")
+        if name not in OPTS:
+            usage()
+        if not eq:
+            i += 1
+            if i >= len(argv):
+                usage()
+            val = argv[i]
+        o[name] = val
+        i += 1
+    return o
+
+
+def atoi(s):
+    s = s.strip()
+    n = ""
+    for ch in s:
+        if ch.isdigit() or (not n and ch in "+-"):
+            n += ch
+        else:
+            break
+    try:
+        return int(n)
+    except ValueError:
+        return 0
+
+
+def atof(s):
+    try:
+        return float(s)
+    except ValueError:
+        return 0.0
+
+
+def strtol0(s):
+    """(value, rest) as strtol(s, &rest, 0): leading white space, a sign, then 0x hex, 0 octal or decimal;
+    (0, s) if there is no digit at all."""
+    i, n = 0, len(s)
+    while i < n and s[i] in " \t\n\v\f\r":
+        i += 1
+    neg = i < n and s[i] == "-"
+    if i < n and s[i] in "+-":
+        i += 1
+    base = 10
+    if s[i:i + 2] in ("0x", "0X") and s[i + 2:i + 3] != "" and s[i + 2] in "0123456789abcdefABCDEF":
+        base, i = 16, i + 2
+    elif s[i:i + 1] == "0":
+        base = 8
+    digits = "0123456789abcdef"[:base]
+    j = i
+    while j < n and s[j].lower() in digits:
+        j += 1
+    if j == i:
+        return 0, s
+    v = int(s[i:j], base)
+    return (-v if neg else v), s[j:]
+
+
+def bursts_scheduled(pps, burst, duration):
+    """Number of bursts the C loop sends: k = 0, 1, ... while t0 + (uint64)(k*gap_ns) < t_end."""
+    gap = burst * 1e9 / pps
+    d = int(duration * 1e9)
+    k = max(0, math.ceil(d / gap) - 2)
+    while int(k * gap) < d:
+        k += 1
+    return k
+
+
+def main():
+    o = parse(sys.argv[1:])
+    frame = atoi(o.get("frame", "0"))
+    burst = atoi(o.get("burst", "1"))
+    flows = atoi(o.get("flows", "1"))
+    pps = atof(o.get("pps", "0"))
+    duration = atof(o.get("duration", "10"))
+    run_id = 0
+    if "run-id" in o:
+        v = o["run-id"]
+        if not v or not v.lstrip("-").isdigit() or not 0 <= int(v) <= 65535:
+            usage()
+        run_id = int(v)
+    if "tos" in o:
+        v, rest = strtol0(o["tos"])
+        if o["tos"] == "" or rest or not 0 <= v <= 255:
+            usage()
+    if frame < 64 or frame > 1518:
+        sys.stderr.write("frame must be 64..1518\n")
+        sys.exit(2)
+    if burst < 1 or burst > 256 or flows < 1 or flows > 4096 or pps < 0 or duration <= 0:
+        usage()
+    if "dump" in o:
+        fakenet.die("bmgen (fake)", "--dump is not faked", 3)
+    ifname = o.get("if")
+    if not ifname:
+        usage()
+    ns = os.environ["FAKE_NS"]
+    if not fakenet.has_iface(ns, ifname):
+        sys.stderr.write(f"no interface {ifname}\n")
+        sys.exit(1)
+    buflen = frame - 4
+    cfg = fakenet.config()
+    with open(os.path.join(fakenet.state_dir(), "bmgen-args.jsonl"), "a") as f:
+        f.write(json.dumps(o) + "\n")
+    fakenet.register_pid()
+    stop = fakenet.Stop()
+
+    if pps > 0:
+        total_bursts = bursts_scheduled(pps, burst, duration)
+        rate_bursts = pps / burst
+    else:
+        rate_bursts = cfg["gen_max_pps_if"].get(ifname, cfg["gen_max_pps"]) / burst
+        total_bursts = int(rate_bursts * duration)
+    sent_bursts = 0
+    t0 = time.monotonic()
+    t0_real = time.time_ns()
+    per_flow = [0] * flows
+    while not stop.flag:
+        el = time.monotonic() - t0
+        if pps > 0:      # paced: burst k is due at k/rate; the C loop exits right after the last one
+            due = min(total_bursts, int(el * rate_bursts) + 1)
+        else:            # as fast as possible until --duration has passed
+            due = total_bursts if el >= duration else min(total_bursts, int(el * rate_bursts))
+        if due > sent_bursts:
+            n = (due - sent_bursts) * burst
+            i0 = sent_bursts * burst
+            with fakenet.txn() as s:
+                fakenet.transmit(s, ns, ifname, {"n": n, "len": buflen, "proto": "bm", "run": run_id,
+                                                 "nflows": flows, "i0": i0,
+                                                 "ts": t0_real + int(sent_bursts / rate_bursts * 1e9),
+                                                 "t": t0_real + int((due - 1) / rate_bursts * 1e9)})
+            sent_bursts = due
+        if sent_bursts >= total_bursts and (pps > 0 or el >= duration):
+            break
+        time.sleep(0.02)
+    t_stop = time.monotonic()
+    sent = sent_bursts * burst
+    for i in range(flows):
+        per_flow[i] = sent // flows + (1 if i < sent % flows else 0)
+    secs = t_stop - t0
+    gap_ns = burst * 1e9 / pps if pps > 0 else 0
+    ifname_out = ifname
+    out = ('{"tool":"bmgen","if":"%s","frame":%d,"buflen":%d,"target_pps":%.1f,"burst":%d,'
+           '"flows":%d,"duration_s":%.6f,"attempted":%d,"send_errors":%d,"last_errno":%d,'
+           '"accepted":%d,"accepted_pps":%.1f,"bursts":%d,"gap_us":%.3f,"late_bursts":%d,"catchup_bursts":%d,'
+           '"max_lag_us":%.1f,"run_id":%d,"cpu_s":%.3f,"per_flow_attempted":['
+           % (ifname_out, frame, buflen, pps, burst, flows, secs, sent, 0, 0, sent, sent / secs,
+              sent_bursts, gap_ns / 1e3, 0, 0, 0.0, run_id, secs))
+    out += ",".join(str(x) for x in per_flow) + '],"per_flow_accepted":['
+    out += ",".join(str(x) for x in per_flow) + "]}\n"
+    sys.stdout.write(out)
+    sys.stdout.flush()
+    fakenet.unregister_pid()
+
+
+if __name__ == "__main__":
+    main()

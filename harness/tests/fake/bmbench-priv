@@ -1,0 +1,106 @@
+#!/bin/bash
+# fake bmbench-priv -- test double of harness/priv/bmbench-priv for the dry run.
+#
+# Same subcommands, arguments, validation, messages and exit codes as the real wrapper, against
+# the fake network in $FAKE_STATE (see fakenet.py) instead of netns/veths. Run it directly (no
+# sudo): bench.py/arms.py reach it through BMBENCH_PRIV, preround.sh through tests/fake/pathshim/sudo.
+#
+# Differences, all forced by running unprivileged:
+#   * no EUID check; the tool runs as the calling user (the real one drops to adam, which is the
+#     same uid on testbed) and holds NO capabilities (the real one hands out cap_net_raw/admin)
+#   * `exec` keeps itself as the parent of the tool and relays TERM/INT/HUP to it, which is what
+#     sudo (the real parent) does; SIGKILL kills only this parent and the tool keeps running, as
+#     it does under sudo
+#   * the cleared environment of `exec` carries FAKE_STATE, FAKE_NS (the netns the tool "is in")
+#     and FAKE_HOME besides the real wrapper's five variables
+#   * /usr/bin/iperf3 runs tests/fake/iperf3; trafgen is not faked
+#   * the allowed root is $FAKE_ROOT (the throwaway bmbench root), not /home/adam/bmbench
+set -euo pipefail
+FAKE_HOME="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
+[[ -n "${FAKE_STATE:-}" && -d "$FAKE_STATE" ]] || { echo "bmbench-priv (fake): FAKE_STATE is not a directory" >&2; exit 2; }
+[[ -n "${FAKE_ROOT:-}" && -d "$FAKE_ROOT" ]] || { echo "bmbench-priv (fake): FAKE_ROOT is not a directory" >&2; exit 2; }
+export FAKE_STATE FAKE_HOME
+PY=/usr/bin/python3
+VERSION=2
+RUN_USER="$(id -un)"
+RUN_HOME="$HOME"
+ALLOWED_ROOT="$(realpath -e -- "$FAKE_ROOT")"
+SYSTEM_TOOLS=(/usr/bin/iperf3 /usr/sbin/trafgen)
+mkdir -p "$FAKE_STATE/pids"
+
+die() { echo "bmbench-priv: $*" >&2; exit 2; }
+[[ $# -ge 1 ]] || die "usage: bmbench-priv topo-up N | topo-down | exec NS CPUS PATH [ARGS...] | netdev NS | cpu-mode bench|restore|show | perf-paranoid 2|4 | selftest"
+
+valid_ns() { [[ "$1" =~ ^bmb-(sw|h[0-7])$ ]] || die "netns must be bmb-sw or bmb-h0..bmb-h7, got '$1'"; }
+all_ns() { ls "$FAKE_STATE/netdev" 2>/dev/null | grep -E '^bmb-(sw|h[0-7])$' || true; }
+valid_cpus() { [[ "$1" =~ ^[0-9]+([,-][0-9]+)*$ ]] || die "bad cpu list '$1'"; }
+
+run_in_ns() {  # $1=ns $2=cpus $3=path, rest = args; returns the tool's status (or dies by its signal)
+    local ns="$1" cpus="$2" path="$3"; shift 3
+    if [[ ! -f "$FAKE_STATE/netdev/$ns" ]]; then
+        echo "nsenter: cannot open /run/netns/$ns: No such file or directory" >&2; exit 1
+    fi
+    local target="$path"
+    case "$path" in
+        /usr/bin/iperf3) target="$FAKE_HOME/iperf3" ;;
+        /usr/sbin/trafgen) echo "bmbench-priv (fake): trafgen is not faked" >&2; exit 127 ;;
+    esac
+    echo $$ > "$FAKE_STATE/pids/$$"
+    /usr/bin/taskset -c "$cpus" \
+        /usr/bin/env -i HOME="$RUN_HOME" USER="$RUN_USER" LOGNAME="$RUN_USER" LANG=C.UTF-8 \
+            PATH=/usr/local/bin:/usr/bin:/bin FAKE_STATE="$FAKE_STATE" FAKE_NS="$ns" FAKE_HOME="$FAKE_HOME" \
+        "$target" "$@" &
+    local child=$! rc=0
+    trap 'kill -TERM "$child" 2>/dev/null || true' TERM
+    trap 'kill -INT "$child" 2>/dev/null || true' INT
+    trap 'kill -HUP "$child" 2>/dev/null || true' HUP
+    while :; do
+        rc=0; wait "$child" || rc=$?
+        kill -0 "$child" 2>/dev/null || break
+    done
+    rm -f "$FAKE_STATE/pids/$$"
+    trap - TERM INT HUP
+    if (( rc > 128 )); then kill -s "$((rc - 128))" $$; fi   # like sudo: die by the tool's signal
+    exit "$rc"
+}
+
+cmd="$1"; shift
+case "$cmd" in
+topo-up|topo-down|cpu-mode|perf-paranoid)
+    exec "$PY" "$FAKE_HOME/fakepriv.py" "$cmd" "$@"
+    ;;
+exec)
+    [[ $# -ge 3 ]] || die "exec NS CPUS PATH [ARGS...]"
+    ns="$1"; cpus="$2"; want="$3"; shift 3
+    valid_ns "$ns"; valid_cpus "$cpus"
+    [[ "$want" == /* ]] || die "PATH must be absolute"
+    ok=no; path=""
+    for t in "${SYSTEM_TOOLS[@]}"; do [[ "$want" == "$t" ]] && { ok=yes; path="$t"; }; done
+    if [[ "$ok" == no ]]; then
+        path="$(realpath -e -- "$want")" || die "no such file: $want"
+        [[ -f "$path" && -x "$path" ]] || die "not an executable regular file: $path"
+        [[ "$path" == "$ALLOWED_ROOT"/* ]] && ok=yes
+    fi
+    [[ "$ok" == yes ]] || die "refusing $path: not under $ALLOWED_ROOT/ and not a whitelisted tool"
+    run_in_ns "$ns" "$cpus" "$path" "$@"
+    ;;
+netdev)
+    ns="${1:-}"; valid_ns "$ns"
+    [[ -f "$FAKE_STATE/netdev/$ns" ]] || { echo "nsenter: cannot open /run/netns/$ns: No such file or directory" >&2; exit 1; }
+    exec /bin/cat "$FAKE_STATE/netdev/$ns"
+    ;;
+selftest)
+    echo "bmbench-priv version $VERSION"
+    [[ -n "$(all_ns)" ]] || echo "no bmb-* netns (run topo-up)"
+    bad=0
+    for ns in $(all_ns); do
+        echo "== $ns"
+        ( run_in_ns "$ns" 0 /bin/sh -c 'id; grep -E "^Cap(Prm|Eff|Amb)" /proc/self/status; /usr/bin/python3 "$FAKE_HOME/fakepriv.py" ip-br-link' ) \
+            || { echo "== $ns: exec path FAILED"; bad=1; }
+    done
+    exit "$bad"
+    ;;
+*)
+    die "unknown subcommand '$cmd'"
+    ;;
+esac

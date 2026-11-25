@@ -1,0 +1,83 @@
+#!/usr/bin/env python3
+"""fake bmnull -- test double of harness/src/bmnull.c for the dry run.
+
+Same options, validation, exit codes and one-line JSON report. Copies what arrives on --in to
+--out (one direction, like the C loop), at most config null_pps frames/s; on --duration expiry or
+SIGTERM/SIGINT it prints the report. pcap_ps_recv counts what reached it; drops are 0.
+"""
+import os
+import sys
+import time
+
+sys.path.insert(0, os.environ.get("FAKE_HOME", os.path.dirname(os.path.abspath(__file__))))
+import fakenet  # noqa: E402
+
+
+def usage():
+    sys.stderr.write("usage: bmnull --in IFACE --out IFACE [--duration S]\n")
+    sys.exit(2)
+
+
+def main():
+    o, argv, i = {}, sys.argv[1:], 0
+    while i < len(argv):
+        name, eq, val = argv[i][2:].partition("=") if argv[i].startswith("--") else ("", "", "")
+        if name not in ("in", "out", "duration"):
+            usage()
+        if not eq:
+            i += 1
+            if i >= len(argv):
+                usage()
+            val = argv[i]
+        o[name] = val
+        i += 1
+    try:
+        duration = float(o.get("duration", "10"))
+    except ValueError:
+        duration = 0.0
+    if "in" not in o or "out" not in o or duration <= 0:
+        usage()
+    ns = os.environ["FAKE_NS"]
+    for ifc in (o["in"], o["out"]):
+        if not fakenet.has_iface(ns, ifc):
+            sys.stderr.write(f"pcap_activate({ifc}): {ifc}: No such device exists\n")
+            sys.exit(1)
+    if ns != "bmb-sw":
+        fakenet.die("bmnull (fake)", "only forwards inside bmb-sw", 3)
+    cfg = fakenet.config()
+    fakenet.register_pid()
+    stop = fakenet.Stop()
+    in_port, out_port = int(o["in"][2:]), int(o["out"][2:])
+    with fakenet.txn() as s:
+        sid = fakenet.open_sock(s, ns, o["in"], "packet")
+    bucket = fakenet.Bucket(cfg["null_pps"], cfg["switch_depth"])
+    stats = {"received": 0, "injected": 0}
+
+    def count(port, b):
+        stats["injected"] += b["n"]
+
+    def received(s):
+        k = s["socks"].get(sid)
+        if k:
+            stats["received"] += sum(b["n"] for b in k["inbox"] if not b.get("outgoing"))
+
+    t0 = time.monotonic()
+    while not stop.flag and time.monotonic() - t0 < duration:
+        with fakenet.txn() as s:
+            received(s)
+            fakenet.forward(s, {in_port: sid}, bucket, lambda p: out_port, count)
+        time.sleep(0.01)
+    secs = time.monotonic() - t0
+    with fakenet.txn() as s:
+        s["socks"].pop(sid, None)
+    sys.stdout.write('{"tool":"bmnull","in":"%s","out":"%s","duration_s":%.6f,"received":%d,'
+                     '"injected":%d,"inject_errors":%d,"pcap_ps_recv":%d,"pcap_ps_drop":%d,'
+                     '"pcap_ps_ifdrop":%d}\n'
+                     % (o["in"], o["out"], secs, stats["received"], stats["injected"], 0,
+                        stats["received"], 0, 0))
+    sys.stdout.flush()
+    fakenet.unregister_pid()
+
+
+if __name__ == "__main__":
+    main()

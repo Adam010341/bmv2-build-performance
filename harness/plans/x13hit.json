@@ -1,0 +1,24 @@
+{
+ "name": "X13HIT",
+ "shuffle_seed": 130,
+ "harness_git": "40a97a7",
+ "instances": [
+  {
+   "id": "hit-x13-C0441",
+   "build": "cm-default",
+   "program": "C0441",
+   "trials": [],
+   "block": 0,
+   "hitcheck": true,
+   "path_profile": "../p4/e8/C0441/PATH.json",
+   "program_json": "../p4/e8/C0441/INDDoS.json",
+   "entries_cli": "../p4/e8/C0441/entries.txt",
+   "gen": {
+    "dst_ip": "10.0.2.2",
+    "src_ip": "10.0.1.1",
+    "tos": 0
+   },
+   "own_frames": true
+  }
+ ]
+}

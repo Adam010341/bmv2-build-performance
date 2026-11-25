@@ -1,0 +1,647 @@
+{
+ "name": "E8",
+ "shuffle_seed": 109,
+ "harness_git": "8cee917",
+ "instances": [
+  {
+   "id": "e8-cm-default-C0303-r0",
+   "build": "cm-default",
+   "program": "C0303",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10,
+     "recv": true
+    },
+    {
+     "kind": "sat",
+     "frame": 1518,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10,
+     "recv": true
+    }
+   ],
+   "block": 0,
+   "program_json": "../p4/e8/C0303/portknock.p4_16.json",
+   "entries_cli": "../p4/e8/C0303/entries.txt",
+   "gen": {
+    "dst_ip": "10.0.3.10",
+    "src_ip": "10.0.2.10",
+    "tos": 0
+   },
+   "own_frames": true
+  },
+  {
+   "id": "e8-cm-default-C0303-r1",
+   "build": "cm-default",
+   "program": "C0303",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10,
+     "recv": true
+    },
+    {
+     "kind": "sat",
+     "frame": 1518,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10,
+     "recv": true
+    }
+   ],
+   "block": 1,
+   "program_json": "../p4/e8/C0303/portknock.p4_16.json",
+   "entries_cli": "../p4/e8/C0303/entries.txt",
+   "gen": {
+    "dst_ip": "10.0.3.10",
+    "src_ip": "10.0.2.10",
+    "tos": 0
+   },
+   "own_frames": true
+  },
+  {
+   "id": "e8-cm-default-C0303-r2",
+   "build": "cm-default",
+   "program": "C0303",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10,
+     "recv": true
+    },
+    {
+     "kind": "sat",
+     "frame": 1518,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10,
+     "recv": true
+    }
+   ],
+   "block": 2,
+   "program_json": "../p4/e8/C0303/portknock.p4_16.json",
+   "entries_cli": "../p4/e8/C0303/entries.txt",
+   "gen": {
+    "dst_ip": "10.0.3.10",
+    "src_ip": "10.0.2.10",
+    "tos": 0
+   },
+   "own_frames": true
+  },
+  {
+   "id": "e8-cm-default-C0303-r3",
+   "build": "cm-default",
+   "program": "C0303",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10,
+     "recv": true
+    },
+    {
+     "kind": "sat",
+     "frame": 1518,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10,
+     "recv": true
+    }
+   ],
+   "block": 3,
+   "program_json": "../p4/e8/C0303/portknock.p4_16.json",
+   "entries_cli": "../p4/e8/C0303/entries.txt",
+   "gen": {
+    "dst_ip": "10.0.3.10",
+    "src_ip": "10.0.2.10",
+    "tos": 0
+   },
+   "own_frames": true
+  },
+  {
+   "id": "e8-cm-default-C0303-r4",
+   "build": "cm-default",
+   "program": "C0303",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10,
+     "recv": true
+    },
+    {
+     "kind": "sat",
+     "frame": 1518,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10,
+     "recv": true
+    }
+   ],
+   "block": 4,
+   "program_json": "../p4/e8/C0303/portknock.p4_16.json",
+   "entries_cli": "../p4/e8/C0303/entries.txt",
+   "gen": {
+    "dst_ip": "10.0.3.10",
+    "src_ip": "10.0.2.10",
+    "tos": 0
+   },
+   "own_frames": true
+  },
+  {
+   "id": "e8-at-docs-perf-C0303-r0",
+   "build": "at-docs-perf",
+   "program": "C0303",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10,
+     "recv": true
+    },
+    {
+     "kind": "sat",
+     "frame": 1518,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10,
+     "recv": true
+    }
+   ],
+   "block": 0,
+   "program_json": "../p4/e8/C0303/portknock.p4_16.json",
+   "entries_cli": "../p4/e8/C0303/entries.txt",
+   "gen": {
+    "dst_ip": "10.0.3.10",
+    "src_ip": "10.0.2.10",
+    "tos": 0
+   },
+   "own_frames": true
+  },
+  {
+   "id": "e8-at-docs-perf-C0303-r1",
+   "build": "at-docs-perf",
+   "program": "C0303",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10,
+     "recv": true
+    },
+    {
+     "kind": "sat",
+     "frame": 1518,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10,
+     "recv": true
+    }
+   ],
+   "block": 1,
+   "program_json": "../p4/e8/C0303/portknock.p4_16.json",
+   "entries_cli": "../p4/e8/C0303/entries.txt",
+   "gen": {
+    "dst_ip": "10.0.3.10",
+    "src_ip": "10.0.2.10",
+    "tos": 0
+   },
+   "own_frames": true
+  },
+  {
+   "id": "e8-at-docs-perf-C0303-r2",
+   "build": "at-docs-perf",
+   "program": "C0303",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10,
+     "recv": true
+    },
+    {
+     "kind": "sat",
+     "frame": 1518,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10,
+     "recv": true
+    }
+   ],
+   "block": 2,
+   "program_json": "../p4/e8/C0303/portknock.p4_16.json",
+   "entries_cli": "../p4/e8/C0303/entries.txt",
+   "gen": {
+    "dst_ip": "10.0.3.10",
+    "src_ip": "10.0.2.10",
+    "tos": 0
+   },
+   "own_frames": true
+  },
+  {
+   "id": "e8-at-docs-perf-C0303-r3",
+   "build": "at-docs-perf",
+   "program": "C0303",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10,
+     "recv": true
+    },
+    {
+     "kind": "sat",
+     "frame": 1518,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10,
+     "recv": true
+    }
+   ],
+   "block": 3,
+   "program_json": "../p4/e8/C0303/portknock.p4_16.json",
+   "entries_cli": "../p4/e8/C0303/entries.txt",
+   "gen": {
+    "dst_ip": "10.0.3.10",
+    "src_ip": "10.0.2.10",
+    "tos": 0
+   },
+   "own_frames": true
+  },
+  {
+   "id": "e8-at-docs-perf-C0303-r4",
+   "build": "at-docs-perf",
+   "program": "C0303",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10,
+     "recv": true
+    },
+    {
+     "kind": "sat",
+     "frame": 1518,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10,
+     "recv": true
+    }
+   ],
+   "block": 4,
+   "program_json": "../p4/e8/C0303/portknock.p4_16.json",
+   "entries_cli": "../p4/e8/C0303/entries.txt",
+   "gen": {
+    "dst_ip": "10.0.3.10",
+    "src_ip": "10.0.2.10",
+    "tos": 0
+   },
+   "own_frames": true
+  },
+  {
+   "id": "e8-cm-default-C0272-r0",
+   "build": "cm-default",
+   "program": "C0272",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10,
+     "recv": true
+    },
+    {
+     "kind": "sat",
+     "frame": 1518,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10,
+     "recv": true
+    }
+   ],
+   "block": 0,
+   "program_json": "../p4/e8/C0272/gnn.json",
+   "entries_cli": "../p4/e8/C0272/entries.txt",
+   "gen": {
+    "dst_ip": "10.0.1.1",
+    "src_ip": "10.0.2.1",
+    "tos": 2
+   },
+   "own_frames": true
+  },
+  {
+   "id": "e8-cm-default-C0272-r1",
+   "build": "cm-default",
+   "program": "C0272",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10,
+     "recv": true
+    },
+    {
+     "kind": "sat",
+     "frame": 1518,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10,
+     "recv": true
+    }
+   ],
+   "block": 1,
+   "program_json": "../p4/e8/C0272/gnn.json",
+   "entries_cli": "../p4/e8/C0272/entries.txt",
+   "gen": {
+    "dst_ip": "10.0.1.1",
+    "src_ip": "10.0.2.1",
+    "tos": 2
+   },
+   "own_frames": true
+  },
+  {
+   "id": "e8-cm-default-C0272-r2",
+   "build": "cm-default",
+   "program": "C0272",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10,
+     "recv": true
+    },
+    {
+     "kind": "sat",
+     "frame": 1518,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10,
+     "recv": true
+    }
+   ],
+   "block": 2,
+   "program_json": "../p4/e8/C0272/gnn.json",
+   "entries_cli": "../p4/e8/C0272/entries.txt",
+   "gen": {
+    "dst_ip": "10.0.1.1",
+    "src_ip": "10.0.2.1",
+    "tos": 2
+   },
+   "own_frames": true
+  },
+  {
+   "id": "e8-cm-default-C0272-r3",
+   "build": "cm-default",
+   "program": "C0272",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10,
+     "recv": true
+    },
+    {
+     "kind": "sat",
+     "frame": 1518,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10,
+     "recv": true
+    }
+   ],
+   "block": 3,
+   "program_json": "../p4/e8/C0272/gnn.json",
+   "entries_cli": "../p4/e8/C0272/entries.txt",
+   "gen": {
+    "dst_ip": "10.0.1.1",
+    "src_ip": "10.0.2.1",
+    "tos": 2
+   },
+   "own_frames": true
+  },
+  {
+   "id": "e8-cm-default-C0272-r4",
+   "build": "cm-default",
+   "program": "C0272",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10,
+     "recv": true
+    },
+    {
+     "kind": "sat",
+     "frame": 1518,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10,
+     "recv": true
+    }
+   ],
+   "block": 4,
+   "program_json": "../p4/e8/C0272/gnn.json",
+   "entries_cli": "../p4/e8/C0272/entries.txt",
+   "gen": {
+    "dst_ip": "10.0.1.1",
+    "src_ip": "10.0.2.1",
+    "tos": 2
+   },
+   "own_frames": true
+  },
+  {
+   "id": "e8-at-docs-perf-C0272-r0",
+   "build": "at-docs-perf",
+   "program": "C0272",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10,
+     "recv": true
+    },
+    {
+     "kind": "sat",
+     "frame": 1518,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10,
+     "recv": true
+    }
+   ],
+   "block": 0,
+   "program_json": "../p4/e8/C0272/gnn.json",
+   "entries_cli": "../p4/e8/C0272/entries.txt",
+   "gen": {
+    "dst_ip": "10.0.1.1",
+    "src_ip": "10.0.2.1",
+    "tos": 2
+   },
+   "own_frames": true
+  },
+  {
+   "id": "e8-at-docs-perf-C0272-r1",
+   "build": "at-docs-perf",
+   "program": "C0272",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10,
+     "recv": true
+    },
+    {
+     "kind": "sat",
+     "frame": 1518,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10,
+     "recv": true
+    }
+   ],
+   "block": 1,
+   "program_json": "../p4/e8/C0272/gnn.json",
+   "entries_cli": "../p4/e8/C0272/entries.txt",
+   "gen": {
+    "dst_ip": "10.0.1.1",
+    "src_ip": "10.0.2.1",
+    "tos": 2
+   },
+   "own_frames": true
+  },
+  {
+   "id": "e8-at-docs-perf-C0272-r2",
+   "build": "at-docs-perf",
+   "program": "C0272",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10,
+     "recv": true
+    },
+    {
+     "kind": "sat",
+     "frame": 1518,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10,
+     "recv": true
+    }
+   ],
+   "block": 2,
+   "program_json": "../p4/e8/C0272/gnn.json",
+   "entries_cli": "../p4/e8/C0272/entries.txt",
+   "gen": {
+    "dst_ip": "10.0.1.1",
+    "src_ip": "10.0.2.1",
+    "tos": 2
+   },
+   "own_frames": true
+  },
+  {
+   "id": "e8-at-docs-perf-C0272-r3",
+   "build": "at-docs-perf",
+   "program": "C0272",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10,
+     "recv": true
+    },
+    {
+     "kind": "sat",
+     "frame": 1518,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10,
+     "recv": true
+    }
+   ],
+   "block": 3,
+   "program_json": "../p4/e8/C0272/gnn.json",
+   "entries_cli": "../p4/e8/C0272/entries.txt",
+   "gen": {
+    "dst_ip": "10.0.1.1",
+    "src_ip": "10.0.2.1",
+    "tos": 2
+   },
+   "own_frames": true
+  },
+  {
+   "id": "e8-at-docs-perf-C0272-r4",
+   "build": "at-docs-perf",
+   "program": "C0272",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10,
+     "recv": true
+    },
+    {
+     "kind": "sat",
+     "frame": 1518,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10,
+     "recv": true
+    }
+   ],
+   "block": 4,
+   "program_json": "../p4/e8/C0272/gnn.json",
+   "entries_cli": "../p4/e8/C0272/entries.txt",
+   "gen": {
+    "dst_ip": "10.0.1.1",
+    "src_ip": "10.0.2.1",
+    "tos": 2
+   },
+   "own_frames": true
+  }
+ ]
+}

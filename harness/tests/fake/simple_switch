@@ -1,0 +1,242 @@
+#!/usr/bin/env python3
+"""fake simple_switch -- test double of bmv2's simple_switch / simple_switch_grpc for the dry run.
+
+Accepts the command line bench.py's Switch builds (-i N@IFACE ..., --thrift-port, --device-id,
+--log-console, --pcap DIR, --nanolog ipc://PATH, -L LEVEL, the program JSON last) and refuses anything else.
+It loads the program JSON, opens its ports after config switch_startup_s (frames sent earlier are
+lost, as with a real switch that is still starting), then forwards every frame that arrives on
+port p to port p ^ 1 -- which is what every program in harness/p4 does -- at most config
+switch_pps frames/s (token bucket; the excess is lost inside the switch, invisible in netdev).
+--log-console: per forwarded frame, one "Processing packet" line and one
+"Table '<name>': hit with handle 0" line per table of the program that has const entries or was
+filled at run time (config miss_table / miss_tables turn those tables' lines into "miss"), capped
+at log_frames_per_s frames/s. Packets are numbered as bmv2 numbers them: the log tag is [N.0], N
+counting every frame the switch receives from a port (E8 / G10 attribute log lines by this id).
+Fault knobs: dead_switch (never forwards), drop_proto (drops every frame of one proto).
+E8 knobs: recirc_copy: every logged frame also gets an [N.2] copy "received on port 0" whose table
+outcomes are the inverse (hit <-> miss), as a recirculated or cloned copy would show in the log.
+own_frames_pps: a program that sends frames of its own to h1. After a flow has been forwarded for
+OWN_WARMUP_S (0.15 s: a 20 ms readiness probe sees none, a 200 ms path probe and a trial do), and
+for as long as frames keep arriving, the switch also emits frames out of port 1 at this rate; they
+are not ours (h1's interface counter counts them, bmrecv reports them as `foreign`).
+Tables filled at run time (a match key and no const entries, E8): the fake drops every frame until
+the fake cli_load.sh has loaded entries for all of them. Its "Thrift server" is the file
+$FAKE_STATE/thrift/<port>.json (written once the ports are open, removed at exit, naming the
+program's tables and actions); cli_load records the tables it filled in <port>.loaded.
+--pcap DIR: <iface>_in.pcap / <iface>_out.pcap files grow with traffic.
+--nanolog ipc://PATH: binds a real AF_UNIX socket at PATH, as nanomsg's ipc transport does, so a
+path longer than sun_path (107 bytes) fails here as it would there.
+SIGTERM/SIGINT: exit 0.
+"""
+import json
+import os
+import socket
+import sys
+import time
+
+sys.path.insert(0, os.environ.get("FAKE_HOME", os.path.dirname(os.path.abspath(__file__))))
+import fakenet  # noqa: E402
+
+NAME = os.path.basename(sys.argv[0])
+OWN_WARMUP_S = 0.15     # own_frames_pps: frames of its own start this long after a flow has begun
+OWN_ACTIVE_S = 0.05     # ... and stop this long after the last frame of the flow
+OWN_NEW_FLOW_S = 0.3    # a gap this long between forwarded frames starts a new flow (new warm-up)
+
+
+def fail(msg, code=1):
+    sys.stderr.write(f"{msg}\n")
+    sys.stdout.flush()
+    sys.exit(code)
+
+
+def parse(argv):
+    o = {"ports": {}, "console": False, "pcap": None, "nanolog": None, "json": None, "thrift": "9090", "level": "trace"}
+    i = 0
+    while i < len(argv):
+        a = argv[i]
+
+        def val():
+            nonlocal i
+            i += 1
+            if i >= len(argv):
+                fail(f"the required argument for option '{a}' is missing")
+            return argv[i]
+        if a in ("-i", "--interface"):
+            n, _, ifc = val().partition("@")
+            if not n.isdigit() or not ifc:
+                fail(f"invalid interface spec '{argv[i]}'")
+            o["ports"][int(n)] = ifc
+        elif a in ("--thrift-port", "--device-id"):
+            v = val()
+            if not v.isdigit():
+                fail(f"the argument ('{v}') for option '{a}' is invalid")
+            if a == "--thrift-port":
+                o["thrift"] = v
+        elif a == "--log-console":
+            o["console"] = True
+        elif a == "--pcap":
+            o["pcap"] = val()
+        elif a == "--nanolog":
+            o["nanolog"] = val()
+        elif a in ("-L", "--log-level"):
+            v = val()
+            if v not in ("trace", "debug", "info", "warn", "error", "off"):
+                fail(f"invalid log level '{v}'")
+            o["level"] = v
+        elif a.startswith("-"):
+            fail(f"unrecognised option '{a}'")
+        else:
+            if o["json"] is not None:
+                fail("too many positional options have been specified on the command line")
+            o["json"] = a
+        i += 1
+    return o
+
+
+def main():
+    o = parse(sys.argv[1:])
+    if not o["json"]:
+        fail("No JSON config given")
+    print("Calling target program-options parser", flush=True)
+    try:
+        with open(o["json"]) as f:
+            prog = json.load(f)
+    except (OSError, ValueError) as e:
+        fail(f"Error when loading JSON input config: {e}")
+    cfg = fakenet.config()
+    ns = os.environ["FAKE_NS"]
+    if ns != "bmb-sw":
+        fail("fake simple_switch: only runs inside bmb-sw", 3)
+    for p, ifc in o["ports"].items():
+        if not fakenet.has_iface(ns, ifc):
+            fail(f"Add port operation failed: {ifc}")
+    ipc = None
+    if o["nanolog"]:
+        if not o["nanolog"].startswith("ipc://"):
+            fail(f"bad nanolog address {o['nanolog']}")
+        path = o["nanolog"][len("ipc://"):]
+        ipc = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        try:
+            ipc.bind(path)
+        except OSError as e:
+            fail(f"nanomsg: cannot bind {o['nanolog']}: {e}")
+    if o["pcap"] and not os.path.isdir(o["pcap"]):
+        fail(f"pcap directory {o['pcap']} does not exist")
+    fakenet.register_pid()
+    stop = fakenet.Stop()
+    tables = [t["name"] for p in prog.get("pipelines", []) for t in p.get("tables", []) if t.get("entries")]
+    runtime = {t["name"] for p in prog.get("pipelines", []) for t in p.get("tables", [])
+               if t.get("key") and not t.get("entries")}
+    tdir = os.path.join(fakenet.state_dir(), "thrift")
+    os.makedirs(tdir, exist_ok=True)
+    thrift_up = os.path.join(tdir, f"{o['thrift']}.json")
+    loaded_path = os.path.join(tdir, f"{o['thrift']}.loaded")
+    for f in (thrift_up, loaded_path):
+        if os.path.exists(f):
+            os.remove(f)
+    time.sleep(cfg["switch_startup_s"])
+    with fakenet.txn() as s:
+        sids = {p: fakenet.open_sock(s, ns, ifc, "packet") for p, ifc in o["ports"].items()}
+    for p, ifc in sorted(o["ports"].items()):
+        print(f"Adding interface {ifc} as port {p}", flush=True)
+    with open(thrift_up + ".tmp", "w") as f:
+        json.dump({"tables": [t["name"] for p in prog.get("pipelines", []) for t in p.get("tables", [])],
+                   "actions": [a["name"] for a in prog.get("actions", [])]}, f)
+    os.replace(thrift_up + ".tmp", thrift_up)
+    loaded = set()
+    bucket = fakenet.Bucket(cfg["switch_pps"], cfg["switch_depth"])
+    log_budget = [0.0, time.monotonic()]
+    pcap_files = {}
+    miss = set(cfg["miss_tables"]) | ({cfg["miss_table"]} if cfg["miss_table"] else set())
+    pkt_no = [0]                                # bmv2 numbers every packet it receives: N.0
+    own = {"start": None, "last": 0.0, "acct": 0.0, "carry": 0.0}   # own_frames_pps bookkeeping
+
+    def table_lines(ts, pid, invert):
+        out = []
+        for t in tables + sorted(loaded):
+            hm = "miss" if (t in miss) != invert else "hit with handle 0"
+            out.append(f"[{ts}.000] [bmv2] [T] [thread {os.getpid()}] [{pid}] [cxt 0] Table '{t}': {hm}\n")
+        return out
+
+    def on_forward(port, b):
+        now = time.monotonic()
+        if own["start"] is None or now - own["last"] > OWN_NEW_FLOW_S:
+            own["start"], own["acct"] = now, now
+        own["last"] = now
+        first_no, pkt_no[0] = pkt_no[0], pkt_no[0] + b["n"]
+        if o["pcap"]:
+            for ifc, d in ((o["ports"][port], "in"), (o["ports"].get(port ^ 1, ""), "out")):
+                if ifc:
+                    f = pcap_files.get((ifc, d))
+                    if f is None:
+                        f = pcap_files[(ifc, d)] = open(os.path.join(o["pcap"], f"{ifc}_{d}.pcap"), "ab")
+                    f.write(b"\0" * (16 + b["len"]) * min(b["n"], 100))
+                    f.flush()
+        if o["console"] and o["level"] != "off":   # -L off: the console sink gets nothing
+            log_budget[0] = min(cfg["log_frames_per_s"], log_budget[0] + (now - log_budget[1]) * cfg["log_frames_per_s"])
+            log_budget[1] = now
+            k = min(b["n"], int(log_budget[0]) if b["n"] > 1 else max(1, int(log_budget[0])))
+            log_budget[0] -= k
+            ts = time.strftime("%H:%M:%S")
+            lines = []
+            for j in range(k):
+                pid = f"{first_no + j}.0"
+                lines.append(f"[{ts}.000] [bmv2] [D] [thread {os.getpid()}] [{pid}] [cxt 0] "
+                             f"Processing packet received on port {port}\n")
+                lines += table_lines(ts, pid, False)
+                if cfg["recirc_copy"]:              # a copy takes another path through the tables
+                    pid = f"{first_no + j}.2"
+                    lines.append(f"[{ts}.000] [bmv2] [D] [thread {os.getpid()}] [{pid}] [cxt 0] "
+                                 f"Processing packet received on port 0\n")
+                    lines += table_lines(ts, pid, True)
+            sys.stdout.write("".join(lines))
+            sys.stdout.flush()
+
+    def own_frames_due():
+        """How many frames of its own the switch emits now (cfg own_frames_pps), 0 outside a flow."""
+        now = time.monotonic()
+        if own["start"] is None or now - own["last"] >= OWN_ACTIVE_S:
+            own["acct"], own["carry"] = now, 0.0
+            return 0
+        t0 = max(own["acct"], own["start"] + OWN_WARMUP_S)
+        own["acct"] = now
+        if now <= t0:
+            return 0
+        own["carry"] += cfg["own_frames_pps"] * (now - t0)
+        k = int(own["carry"])
+        own["carry"] -= k
+        return k
+
+    while not stop.flag:
+        if not runtime <= loaded:
+            try:
+                with open(loaded_path) as f:
+                    loaded = set(json.load(f)) & runtime
+            except (OSError, ValueError):
+                pass
+        with fakenet.txn() as s:
+            if cfg["dead_switch"] or not runtime <= loaded:
+                for sid in sids.values():
+                    fakenet.pop(s, sid)
+            else:
+                fakenet.forward(s, sids, bucket, lambda p: p ^ 1, on_forward, cfg["drop_proto"])
+                k = own_frames_due() if cfg["own_frames_pps"] > 0 else 0
+                if k:       # frames of the program's own: not bmgen's, so bmrecv counts them `foreign`
+                    now_ns = time.time_ns()
+                    fakenet.transmit(s, ns, "sw1", {"n": k, "len": 60, "proto": "own", "ts": now_ns, "t": now_ns})
+        time.sleep(0.01)
+    with fakenet.txn() as s:
+        for sid in sids.values():
+            s["socks"].pop(sid, None)
+    for f in (thrift_up, loaded_path):
+        if os.path.exists(f):
+            os.remove(f)
+    for f in pcap_files.values():
+        f.close()
+    if ipc:
+        ipc.close()
+    fakenet.unregister_pid()
+
+
+if __name__ == "__main__":
+    main()

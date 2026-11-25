@@ -1,0 +1,258 @@
+#!/usr/bin/env python3
+"""fake iperf3 -- test double of iperf 3.16 (Ubuntu 24.04) for the dry run, UDP and a TCP bulk mode.
+
+Covers the two command lines arms.iperf3_ladder runs:
+  server  iperf3 -s -1 -p PORT --json                 (in bmb-h1)
+  client  iperf3 -c HOST -u -b BPS -l LEN -t SECS -p PORT --json   (in bmb-h0)
+Both travel the fake network: the control connection is a SYN / SYN-ACK exchange and a results
+exchange whose frames cross the fake switch (and can be lost there; they are retried as TCP
+would), the datagrams are LEN + 42 byte frames paced at BPS / (8 LEN) per second (-b counts
+UDP payload bits, as iperf3 3.16 does). A SYN to a port nobody listens on is answered with RST by
+the receiving host ("Connection refused"); unanswered SYNs time out after config
+tcp_syn_timeout_s. The server counts lost = highest seq seen - datagrams received, as iperf3
+does (so loss after the last datagram that arrived is not counted).
+Without -u it does a TCP bulk test as a UDP-like paced stream of 1448-byte segments at config
+tcp_fake_bps, reported in iperf3's TCP layout (sum_sent with retransmits, sum_received).
+JSON layout (start / intervals / end with streams, sum, sum_sent, sum_received,
+cpu_utilization_percent; "error" on failure, exit 1) copied from real iperf 3.16 output.
+"""
+import json
+import os
+import sys
+import time
+
+sys.path.insert(0, os.environ.get("FAKE_HOME", os.path.dirname(os.path.abspath(__file__))))
+import fakenet  # noqa: E402
+
+VERSION = "iperf 3.16"
+
+
+def param_error(msg):
+    sys.stderr.write(f"iperf3: parameter error - {msg}\n")
+    sys.exit(1)
+
+
+def parse(argv):
+    o = {"server": False, "client": None, "udp": False, "bps": None, "len": None, "t": 10.0,
+         "port": 5201, "json": False, "one_off": False}
+    i = 0
+    while i < len(argv):
+        a = argv[i]
+
+        def val():
+            nonlocal i
+            i += 1
+            if i >= len(argv):
+                param_error(f"option '{a}' requires an argument")
+            return argv[i]
+        if a in ("-s", "--server"):
+            o["server"] = True
+        elif a in ("-c", "--client"):
+            o["client"] = val()
+        elif a in ("-u", "--udp"):
+            o["udp"] = True
+        elif a in ("-b", "--bitrate", "--bandwidth"):
+            v = val()
+            mult = {"k": 1e3, "m": 1e6, "g": 1e9}.get(v[-1:].lower(), 1)
+            o["bps"] = float(v[:-1] if mult != 1 else v) * mult
+        elif a in ("-l", "--length"):
+            o["len"] = int(val())
+        elif a in ("-t", "--time"):
+            o["t"] = float(val())
+        elif a in ("-p", "--port"):
+            o["port"] = int(val())
+        elif a in ("-J", "--json"):
+            o["json"] = True
+        elif a in ("-1", "--one-off"):
+            o["one_off"] = True
+        else:
+            param_error(f"unrecognized option '{a}'")
+        i += 1
+    if o["server"] == bool(o["client"]):
+        param_error("must either be a client (-c) or server (-s)")
+    if not o["json"]:
+        param_error("the fake only speaks --json")
+    return o
+
+
+def start_block(role, o, ns):
+    return {"connected": [], "version": VERSION, "system_info": "Linux fake (bmbench dry run)",
+            "timestamp": {"time": time.strftime("%a, %d %b %Y %H:%M:%S GMT", time.gmtime()),
+                          "timesecs": int(time.time())},
+            "accepted_connection" if role == "server" else "connecting_to":
+                {"host": o.get("client") or fakenet.host_ip(ns), "port": o["port"]}}
+
+
+def fail(start, msg):
+    print(json.dumps({"start": start, "intervals": [], "end": {}, "error": msg}, indent="\t"))
+    sys.stdout.flush()
+    fakenet.unregister_pid()
+    sys.exit(1)
+
+
+def summary(secs, nbytes, packets, lost, sender, jitter=0.0):
+    return {"start": 0, "end": secs, "seconds": secs, "bytes": nbytes,
+            "bits_per_second": nbytes * 8 / secs if secs > 0 else 0, "jitter_ms": jitter,
+            "lost_packets": lost, "packets": packets,
+            "lost_percent": 100.0 * lost / packets if packets else 0, "sender": sender}
+
+
+def send(s, ns, ifc, **b):
+    fakenet.transmit(s, ns, ifc, {"n": 1, "len": 66, **b})
+
+
+def main():
+    o = parse(sys.argv[1:])
+    ns = os.environ["FAKE_NS"]
+    me = fakenet.host_ip(ns)
+    ifc = f"h{ns[5:]}" if ns.startswith("bmb-h") else None
+    if not me or not fakenet.has_iface(ns, ifc):
+        sys.stderr.write("iperf3: error - no usable interface in this netns\n")
+        sys.exit(1)
+    cfg = fakenet.config()
+    fakenet.register_pid()
+    stop = fakenet.Stop()
+    if o["server"]:
+        server(o, ns, me, ifc, stop)
+    else:
+        client(o, ns, me, ifc, cfg, stop)
+    fakenet.unregister_pid()
+
+
+def server(o, ns, me, ifc, stop):
+    start = start_block("server", o, ns)
+    with fakenet.txn() as s:
+        busy = fakenet._sockets(s, ns, None, "tcp", o["port"])
+        if not busy:
+            tsid = fakenet.open_sock(s, ns, None, "tcp", o["port"])
+            usid = fakenet.open_sock(s, ns, None, "udp", o["port"])
+    if busy:
+        fail(start, "unable to start listener for connections: Address already in use")
+    received, max_seq, t_first, done_at, client, L = 0, 0, None, None, None, 0
+    while True:
+        if stop.flag:
+            fakenet.close_sock(tsid)
+            fakenet.close_sock(usid)
+            fail(start, "interrupt - the server has terminated")
+        with fakenet.txn() as s:
+            for b in fakenet.pop(s, tsid):
+                if b.get("flags") == "SYN":
+                    client = (b["src"], b["sport"])
+                    send(s, ns, ifc, proto="tcp", flags="SYNACK", src=me, dst=b["src"],
+                         sport=o["port"], dport=b["sport"])
+                elif b.get("flags") == "DATA" and (b.get("data") or {}).get("type") == "results":
+                    lost = max_seq - received
+                    send(s, ns, ifc, proto="tcp", flags="DATA", src=me, dst=b["src"], sport=o["port"],
+                         dport=b["sport"], data={"type": "results", "received": received,
+                                                 "packet_count": max_seq, "lost": lost})
+                    done_at = done_at or time.monotonic()
+            for b in fakenet.pop(s, usid):
+                received += b["n"]
+                L = b["len"] - 42
+                max_seq = max(max_seq, b["s0"] + b["n"] - 1)
+                t_first = t_first or time.monotonic()
+        if done_at and time.monotonic() - done_at > 1.0:      # linger for a lost results reply
+            break
+        time.sleep(0.05)
+    secs = max(1e-6, done_at - (t_first or done_at)) if t_first else 0.0
+    with fakenet.txn() as s:
+        s["socks"].pop(tsid, None)
+        s["socks"].pop(usid, None)
+    start["connected"] = [{"socket": 5, "local_host": me, "local_port": o["port"],
+                           "remote_host": client[0] if client else "", "remote_port": client[1] if client else 0}]
+    rx = summary(secs, received * L, max_seq, max_seq - received, False, 0.01)
+    print(json.dumps({"start": start, "intervals": [],
+                      "end": {"streams": [{"udp": {"socket": 5, **rx, "out_of_order": 0}}],
+                              "sum": rx, "sum_sent": summary(secs, 0, 0, 0, True), "sum_received": rx,
+                              "cpu_utilization_percent": {"host_total": 1.0, "remote_total": 1.0}}},
+                     indent="\t"))
+    sys.stdout.flush()
+
+
+def client(o, ns, me, ifc, cfg, stop):
+    tcp = not o["udp"]          # TCP: bulk data at config tcp_fake_bps in MSS-sized frames over the fake path
+    start = start_block("client", o, ns)
+    host, port = o["client"], o["port"]
+    L = o["len"] or (1448 if tcp else 1460)
+    bps = cfg.get("tcp_fake_bps", 20e6) if tcp else (o["bps"] if o["bps"] is not None else 1e6)
+    cport = 32768 + os.getpid() % 28000
+    with fakenet.txn() as s:
+        sid = fakenet.open_sock(s, ns, None, "tcp", cport)
+        send(s, ns, ifc, proto="tcp", flags="SYN", src=me, dst=host, sport=cport, dport=port)
+    # connect, retransmitting the SYN after 1, 2, 4 ... s like Linux
+    t0, nxt, rto, state = time.monotonic(), 1.0, 1.0, None
+    while state is None:
+        if stop.flag:
+            fakenet.close_sock(sid)
+            fail(start, "interrupt - the client has terminated")
+        with fakenet.txn() as s:
+            for b in fakenet.pop(s, sid):
+                if b.get("flags") in ("SYNACK", "RST"):
+                    state = b["flags"]
+            el = time.monotonic() - t0
+            if state is None and el >= nxt:
+                send(s, ns, ifc, proto="tcp", flags="SYN", src=me, dst=host, sport=cport, dport=port)
+                rto *= 2
+                nxt += rto
+        if state is None and time.monotonic() - t0 > cfg["tcp_syn_timeout_s"]:
+            fakenet.close_sock(sid)
+            fail(start, "unable to connect to server - server may have stopped running or use a "
+                        "different port, firewall issue, etc.: Connection timed out")
+        time.sleep(0.01)
+    if state == "RST":
+        fakenet.close_sock(sid)
+        fail(start, "unable to connect to server - server may have stopped running or use a "
+                    "different port, firewall issue, etc.: Connection refused")
+    start["connected"] = [{"socket": 5, "local_host": me, "local_port": cport + 1,
+                           "remote_host": host, "remote_port": port}]
+    start["test_start"] = {"protocol": "TCP" if tcp else "UDP", "num_streams": 1, "blksize": L, "omit": 0, "duration": int(o["t"]),
+                           "bytes": 0, "blocks": 0, "reverse": 0, "tos": 0, "target_bitrate": int(bps)}
+    pps = bps / (8.0 * L)
+    total = int(pps * o["t"])
+    sent, t_send, t_send_real = 0, time.monotonic(), time.time_ns()
+    while sent < total and not stop.flag:
+        el = time.monotonic() - t_send
+        due = total if el >= o["t"] else min(total, int(el * pps))
+        if due > sent:
+            with fakenet.txn() as s:
+                fakenet.transmit(s, ns, ifc, {"n": due - sent, "len": L + 42, "proto": "udp", "sport": cport + 1,
+                                              "dport": port, "src": me, "dst": host, "s0": sent + 1,
+                                              "ts": t_send_real + int(sent / pps * 1e9),
+                                              "t": t_send_real + int((due - 1) / pps * 1e9)})
+            sent = due
+        if sent < total:
+            time.sleep(0.05)
+    secs = time.monotonic() - t_send
+    # results exchange over the control connection
+    res, t_r, nxt = None, time.monotonic(), 0.0
+    while res is None:
+        el = time.monotonic() - t_r
+        if el > 10:
+            fakenet.close_sock(sid)
+            fail(start, "unable to receive results: Connection timed out")
+        with fakenet.txn() as s:
+            for b in fakenet.pop(s, sid):
+                if b.get("flags") == "DATA" and (b.get("data") or {}).get("type") == "results":
+                    res = b["data"]
+            if res is None and el >= nxt:
+                send(s, ns, ifc, proto="tcp", flags="DATA", src=me, dst=host, sport=cport, dport=port,
+                     data={"type": "results", "sent": sent, "len": L})
+                nxt += 0.3
+        time.sleep(0.01)
+    fakenet.close_sock(sid)
+    tx = summary(secs, sent * L, sent, 0, True)
+    rx = summary(secs, res["received"] * L, res["packet_count"], res["lost"], False, 0.01)
+    if tcp:                     # iperf3 3.16 TCP layout: bytes / bits_per_second, retransmits on the sender side
+        tx = {k: tx[k] for k in ("start", "end", "seconds", "bytes", "bits_per_second", "sender")} | {"retransmits": 0}
+        rx = {k: rx[k] for k in ("start", "end", "seconds", "bytes", "bits_per_second", "sender")}
+    print(json.dumps({"start": start,
+                      "intervals": [{"streams": [], "sum": summary(min(1.0, secs), 0, 0, 0, True)}],
+                      "end": {"streams": [{"udp": {"socket": 5, **tx, "out_of_order": 0}}],
+                              "sum": {**rx, "sender": True}, "sum_sent": tx, "sum_received": rx,
+                              "cpu_utilization_percent": {"host_total": 1.0, "remote_total": 1.0}}},
+                     indent="\t"))
+    sys.stdout.flush()
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,175 @@
+{
+ "name": "HITCHECK",
+ "shuffle_seed": 100,
+ "harness_git": "c428577",
+ "instances": [
+  {
+   "id": "hit-exact_1",
+   "build": "cm-o3-L1-E1",
+   "program": "exact_1",
+   "trials": [],
+   "block": 0,
+   "hitcheck": true
+  },
+  {
+   "id": "hit-exact_2",
+   "build": "cm-o3-L1-E1",
+   "program": "exact_2",
+   "trials": [],
+   "block": 0,
+   "hitcheck": true
+  },
+  {
+   "id": "hit-exact_4",
+   "build": "cm-o3-L1-E1",
+   "program": "exact_4",
+   "trials": [],
+   "block": 0,
+   "hitcheck": true
+  },
+  {
+   "id": "hit-exact_8",
+   "build": "cm-o3-L1-E1",
+   "program": "exact_8",
+   "trials": [],
+   "block": 0,
+   "hitcheck": true
+  },
+  {
+   "id": "hit-flow_exact_1",
+   "build": "cm-o3-L1-E1",
+   "program": "flow_exact_1",
+   "trials": [],
+   "block": 0,
+   "hitcheck": true
+  },
+  {
+   "id": "hit-flow_exact_16",
+   "build": "cm-o3-L1-E1",
+   "program": "flow_exact_16",
+   "trials": [],
+   "block": 0,
+   "hitcheck": true
+  },
+  {
+   "id": "hit-flow_exact_256",
+   "build": "cm-o3-L1-E1",
+   "program": "flow_exact_256",
+   "trials": [],
+   "block": 0,
+   "hitcheck": true
+  },
+  {
+   "id": "hit-flow_ternary_1",
+   "build": "cm-o3-L1-E1",
+   "program": "flow_ternary_1",
+   "trials": [],
+   "block": 0,
+   "hitcheck": true
+  },
+  {
+   "id": "hit-flow_ternary_16",
+   "build": "cm-o3-L1-E1",
+   "program": "flow_ternary_16",
+   "trials": [],
+   "block": 0,
+   "hitcheck": true
+  },
+  {
+   "id": "hit-flow_ternary_256",
+   "build": "cm-o3-L1-E1",
+   "program": "flow_ternary_256",
+   "trials": [],
+   "block": 0,
+   "hitcheck": true
+  },
+  {
+   "id": "hit-l3",
+   "build": "cm-o3-L1-E1",
+   "program": "l3",
+   "trials": [],
+   "block": 0,
+   "hitcheck": true
+  },
+  {
+   "id": "hit-l3_reg",
+   "build": "cm-o3-L1-E1",
+   "program": "l3_reg",
+   "trials": [],
+   "block": 0,
+   "hitcheck": true
+  },
+  {
+   "id": "hit-lpm_1",
+   "build": "cm-o3-L1-E1",
+   "program": "lpm_1",
+   "trials": [],
+   "block": 0,
+   "hitcheck": true
+  },
+  {
+   "id": "hit-lpm_2",
+   "build": "cm-o3-L1-E1",
+   "program": "lpm_2",
+   "trials": [],
+   "block": 0,
+   "hitcheck": true
+  },
+  {
+   "id": "hit-lpm_4",
+   "build": "cm-o3-L1-E1",
+   "program": "lpm_4",
+   "trials": [],
+   "block": 0,
+   "hitcheck": true
+  },
+  {
+   "id": "hit-lpm_8",
+   "build": "cm-o3-L1-E1",
+   "program": "lpm_8",
+   "trials": [],
+   "block": 0,
+   "hitcheck": true
+  },
+  {
+   "id": "hit-min",
+   "build": "cm-o3-L1-E1",
+   "program": "min",
+   "trials": [],
+   "block": 0,
+   "hitcheck": true
+  },
+  {
+   "id": "hit-ternary_1",
+   "build": "cm-o3-L1-E1",
+   "program": "ternary_1",
+   "trials": [],
+   "block": 0,
+   "hitcheck": true
+  },
+  {
+   "id": "hit-ternary_2",
+   "build": "cm-o3-L1-E1",
+   "program": "ternary_2",
+   "trials": [],
+   "block": 0,
+   "hitcheck": true
+  },
+  {
+   "id": "hit-ternary_4",
+   "build": "cm-o3-L1-E1",
+   "program": "ternary_4",
+   "trials": [],
+   "block": 0,
+   "hitcheck": true
+  },
+  {
+   "id": "hit-ternary_8",
+   "build": "cm-o3-L1-E1",
+   "program": "ternary_8",
+   "trials": [],
+   "block": 0,
+   "hitcheck": true
+  }
+ ]
+}

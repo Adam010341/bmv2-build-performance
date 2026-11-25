@@ -1,0 +1,1207 @@
+{
+ "name": "E1-RT",
+ "shuffle_seed": 102,
+ "harness_git": "c428577",
+ "instances": [
+  {
+   "id": "e1rt-cm-o0-L1-E1-none-r0",
+   "build": "cm-o0-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 0,
+   "runtime": "none"
+  },
+  {
+   "id": "e1rt-cm-o0-L1-E1-none-r1",
+   "build": "cm-o0-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 1,
+   "runtime": "none"
+  },
+  {
+   "id": "e1rt-cm-o0-L1-E1-none-r2",
+   "build": "cm-o0-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 2,
+   "runtime": "none"
+  },
+  {
+   "id": "e1rt-cm-o0-L1-E1-none-r3",
+   "build": "cm-o0-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 3,
+   "runtime": "none"
+  },
+  {
+   "id": "e1rt-cm-o0-L1-E1-none-r4",
+   "build": "cm-o0-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 4,
+   "runtime": "none"
+  },
+  {
+   "id": "e1rt-cm-o0-L1-E1-console-r0",
+   "build": "cm-o0-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 0,
+   "runtime": "console"
+  },
+  {
+   "id": "e1rt-cm-o0-L1-E1-console-r1",
+   "build": "cm-o0-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 1,
+   "runtime": "console"
+  },
+  {
+   "id": "e1rt-cm-o0-L1-E1-console-r2",
+   "build": "cm-o0-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 2,
+   "runtime": "console"
+  },
+  {
+   "id": "e1rt-cm-o0-L1-E1-console-r3",
+   "build": "cm-o0-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 3,
+   "runtime": "console"
+  },
+  {
+   "id": "e1rt-cm-o0-L1-E1-console-r4",
+   "build": "cm-o0-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 4,
+   "runtime": "console"
+  },
+  {
+   "id": "e1rt-cm-o0-L1-E1-pcap-r0",
+   "build": "cm-o0-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 0,
+   "runtime": "pcap"
+  },
+  {
+   "id": "e1rt-cm-o0-L1-E1-pcap-r1",
+   "build": "cm-o0-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 1,
+   "runtime": "pcap"
+  },
+  {
+   "id": "e1rt-cm-o0-L1-E1-pcap-r2",
+   "build": "cm-o0-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 2,
+   "runtime": "pcap"
+  },
+  {
+   "id": "e1rt-cm-o0-L1-E1-pcap-r3",
+   "build": "cm-o0-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 3,
+   "runtime": "pcap"
+  },
+  {
+   "id": "e1rt-cm-o0-L1-E1-pcap-r4",
+   "build": "cm-o0-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 4,
+   "runtime": "pcap"
+  },
+  {
+   "id": "e1rt-cm-o0-L1-E1-nanolog-r0",
+   "build": "cm-o0-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 0,
+   "runtime": "nanolog"
+  },
+  {
+   "id": "e1rt-cm-o0-L1-E1-nanolog-r1",
+   "build": "cm-o0-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 1,
+   "runtime": "nanolog"
+  },
+  {
+   "id": "e1rt-cm-o0-L1-E1-nanolog-r2",
+   "build": "cm-o0-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 2,
+   "runtime": "nanolog"
+  },
+  {
+   "id": "e1rt-cm-o0-L1-E1-nanolog-r3",
+   "build": "cm-o0-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 3,
+   "runtime": "nanolog"
+  },
+  {
+   "id": "e1rt-cm-o0-L1-E1-nanolog-r4",
+   "build": "cm-o0-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 4,
+   "runtime": "nanolog"
+  },
+  {
+   "id": "e1rt-cm-o0-L1-E1-tutorial-r0",
+   "build": "cm-o0-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 0,
+   "runtime": "tutorial"
+  },
+  {
+   "id": "e1rt-cm-o0-L1-E1-tutorial-r1",
+   "build": "cm-o0-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 1,
+   "runtime": "tutorial"
+  },
+  {
+   "id": "e1rt-cm-o0-L1-E1-tutorial-r2",
+   "build": "cm-o0-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 2,
+   "runtime": "tutorial"
+  },
+  {
+   "id": "e1rt-cm-o0-L1-E1-tutorial-r3",
+   "build": "cm-o0-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 3,
+   "runtime": "tutorial"
+  },
+  {
+   "id": "e1rt-cm-o0-L1-E1-tutorial-r4",
+   "build": "cm-o0-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 4,
+   "runtime": "tutorial"
+  },
+  {
+   "id": "e1rt-cm-o3-L1-E1-none-r0",
+   "build": "cm-o3-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 0,
+   "runtime": "none"
+  },
+  {
+   "id": "e1rt-cm-o3-L1-E1-none-r1",
+   "build": "cm-o3-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 1,
+   "runtime": "none"
+  },
+  {
+   "id": "e1rt-cm-o3-L1-E1-none-r2",
+   "build": "cm-o3-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 2,
+   "runtime": "none"
+  },
+  {
+   "id": "e1rt-cm-o3-L1-E1-none-r3",
+   "build": "cm-o3-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 3,
+   "runtime": "none"
+  },
+  {
+   "id": "e1rt-cm-o3-L1-E1-none-r4",
+   "build": "cm-o3-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 4,
+   "runtime": "none"
+  },
+  {
+   "id": "e1rt-cm-o3-L1-E1-console-r0",
+   "build": "cm-o3-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 0,
+   "runtime": "console"
+  },
+  {
+   "id": "e1rt-cm-o3-L1-E1-console-r1",
+   "build": "cm-o3-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 1,
+   "runtime": "console"
+  },
+  {
+   "id": "e1rt-cm-o3-L1-E1-console-r2",
+   "build": "cm-o3-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 2,
+   "runtime": "console"
+  },
+  {
+   "id": "e1rt-cm-o3-L1-E1-console-r3",
+   "build": "cm-o3-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 3,
+   "runtime": "console"
+  },
+  {
+   "id": "e1rt-cm-o3-L1-E1-console-r4",
+   "build": "cm-o3-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 4,
+   "runtime": "console"
+  },
+  {
+   "id": "e1rt-cm-o3-L1-E1-pcap-r0",
+   "build": "cm-o3-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 0,
+   "runtime": "pcap"
+  },
+  {
+   "id": "e1rt-cm-o3-L1-E1-pcap-r1",
+   "build": "cm-o3-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 1,
+   "runtime": "pcap"
+  },
+  {
+   "id": "e1rt-cm-o3-L1-E1-pcap-r2",
+   "build": "cm-o3-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 2,
+   "runtime": "pcap"
+  },
+  {
+   "id": "e1rt-cm-o3-L1-E1-pcap-r3",
+   "build": "cm-o3-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 3,
+   "runtime": "pcap"
+  },
+  {
+   "id": "e1rt-cm-o3-L1-E1-pcap-r4",
+   "build": "cm-o3-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 4,
+   "runtime": "pcap"
+  },
+  {
+   "id": "e1rt-cm-o3-L1-E1-nanolog-r0",
+   "build": "cm-o3-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 0,
+   "runtime": "nanolog"
+  },
+  {
+   "id": "e1rt-cm-o3-L1-E1-nanolog-r1",
+   "build": "cm-o3-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 1,
+   "runtime": "nanolog"
+  },
+  {
+   "id": "e1rt-cm-o3-L1-E1-nanolog-r2",
+   "build": "cm-o3-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 2,
+   "runtime": "nanolog"
+  },
+  {
+   "id": "e1rt-cm-o3-L1-E1-nanolog-r3",
+   "build": "cm-o3-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 3,
+   "runtime": "nanolog"
+  },
+  {
+   "id": "e1rt-cm-o3-L1-E1-nanolog-r4",
+   "build": "cm-o3-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 4,
+   "runtime": "nanolog"
+  },
+  {
+   "id": "e1rt-cm-o3-L1-E1-tutorial-r0",
+   "build": "cm-o3-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 0,
+   "runtime": "tutorial"
+  },
+  {
+   "id": "e1rt-cm-o3-L1-E1-tutorial-r1",
+   "build": "cm-o3-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 1,
+   "runtime": "tutorial"
+  },
+  {
+   "id": "e1rt-cm-o3-L1-E1-tutorial-r2",
+   "build": "cm-o3-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 2,
+   "runtime": "tutorial"
+  },
+  {
+   "id": "e1rt-cm-o3-L1-E1-tutorial-r3",
+   "build": "cm-o3-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 3,
+   "runtime": "tutorial"
+  },
+  {
+   "id": "e1rt-cm-o3-L1-E1-tutorial-r4",
+   "build": "cm-o3-L1-E1",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 4,
+   "runtime": "tutorial"
+  },
+  {
+   "id": "e1rt-docker-grpc_latest-b2ca70c6b04e-none-r0",
+   "build": "docker-grpc:latest-b2ca70c6b04e",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 0,
+   "runtime": "none"
+  },
+  {
+   "id": "e1rt-docker-grpc_latest-b2ca70c6b04e-none-r1",
+   "build": "docker-grpc:latest-b2ca70c6b04e",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 1,
+   "runtime": "none"
+  },
+  {
+   "id": "e1rt-docker-grpc_latest-b2ca70c6b04e-none-r2",
+   "build": "docker-grpc:latest-b2ca70c6b04e",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 2,
+   "runtime": "none"
+  },
+  {
+   "id": "e1rt-docker-grpc_latest-b2ca70c6b04e-none-r3",
+   "build": "docker-grpc:latest-b2ca70c6b04e",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 3,
+   "runtime": "none"
+  },
+  {
+   "id": "e1rt-docker-grpc_latest-b2ca70c6b04e-none-r4",
+   "build": "docker-grpc:latest-b2ca70c6b04e",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 4,
+   "runtime": "none"
+  },
+  {
+   "id": "e1rt-docker-grpc_latest-b2ca70c6b04e-console-r0",
+   "build": "docker-grpc:latest-b2ca70c6b04e",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 0,
+   "runtime": "console"
+  },
+  {
+   "id": "e1rt-docker-grpc_latest-b2ca70c6b04e-console-r1",
+   "build": "docker-grpc:latest-b2ca70c6b04e",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 1,
+   "runtime": "console"
+  },
+  {
+   "id": "e1rt-docker-grpc_latest-b2ca70c6b04e-console-r2",
+   "build": "docker-grpc:latest-b2ca70c6b04e",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 2,
+   "runtime": "console"
+  },
+  {
+   "id": "e1rt-docker-grpc_latest-b2ca70c6b04e-console-r3",
+   "build": "docker-grpc:latest-b2ca70c6b04e",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 3,
+   "runtime": "console"
+  },
+  {
+   "id": "e1rt-docker-grpc_latest-b2ca70c6b04e-console-r4",
+   "build": "docker-grpc:latest-b2ca70c6b04e",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 4,
+   "runtime": "console"
+  },
+  {
+   "id": "e1rt-docker-grpc_latest-b2ca70c6b04e-pcap-r0",
+   "build": "docker-grpc:latest-b2ca70c6b04e",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 0,
+   "runtime": "pcap"
+  },
+  {
+   "id": "e1rt-docker-grpc_latest-b2ca70c6b04e-pcap-r1",
+   "build": "docker-grpc:latest-b2ca70c6b04e",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 1,
+   "runtime": "pcap"
+  },
+  {
+   "id": "e1rt-docker-grpc_latest-b2ca70c6b04e-pcap-r2",
+   "build": "docker-grpc:latest-b2ca70c6b04e",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 2,
+   "runtime": "pcap"
+  },
+  {
+   "id": "e1rt-docker-grpc_latest-b2ca70c6b04e-pcap-r3",
+   "build": "docker-grpc:latest-b2ca70c6b04e",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 3,
+   "runtime": "pcap"
+  },
+  {
+   "id": "e1rt-docker-grpc_latest-b2ca70c6b04e-pcap-r4",
+   "build": "docker-grpc:latest-b2ca70c6b04e",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 4,
+   "runtime": "pcap"
+  },
+  {
+   "id": "e1rt-docker-grpc_latest-b2ca70c6b04e-nanolog-r0",
+   "build": "docker-grpc:latest-b2ca70c6b04e",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 0,
+   "runtime": "nanolog"
+  },
+  {
+   "id": "e1rt-docker-grpc_latest-b2ca70c6b04e-nanolog-r1",
+   "build": "docker-grpc:latest-b2ca70c6b04e",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 1,
+   "runtime": "nanolog"
+  },
+  {
+   "id": "e1rt-docker-grpc_latest-b2ca70c6b04e-nanolog-r2",
+   "build": "docker-grpc:latest-b2ca70c6b04e",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 2,
+   "runtime": "nanolog"
+  },
+  {
+   "id": "e1rt-docker-grpc_latest-b2ca70c6b04e-nanolog-r3",
+   "build": "docker-grpc:latest-b2ca70c6b04e",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 3,
+   "runtime": "nanolog"
+  },
+  {
+   "id": "e1rt-docker-grpc_latest-b2ca70c6b04e-nanolog-r4",
+   "build": "docker-grpc:latest-b2ca70c6b04e",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 4,
+   "runtime": "nanolog"
+  },
+  {
+   "id": "e1rt-docker-grpc_latest-b2ca70c6b04e-tutorial-r0",
+   "build": "docker-grpc:latest-b2ca70c6b04e",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 0,
+   "runtime": "tutorial"
+  },
+  {
+   "id": "e1rt-docker-grpc_latest-b2ca70c6b04e-tutorial-r1",
+   "build": "docker-grpc:latest-b2ca70c6b04e",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 1,
+   "runtime": "tutorial"
+  },
+  {
+   "id": "e1rt-docker-grpc_latest-b2ca70c6b04e-tutorial-r2",
+   "build": "docker-grpc:latest-b2ca70c6b04e",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 2,
+   "runtime": "tutorial"
+  },
+  {
+   "id": "e1rt-docker-grpc_latest-b2ca70c6b04e-tutorial-r3",
+   "build": "docker-grpc:latest-b2ca70c6b04e",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 3,
+   "runtime": "tutorial"
+  },
+  {
+   "id": "e1rt-docker-grpc_latest-b2ca70c6b04e-tutorial-r4",
+   "build": "docker-grpc:latest-b2ca70c6b04e",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 4,
+   "runtime": "tutorial"
+  }
+ ]
+}

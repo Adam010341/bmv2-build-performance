@@ -1,0 +1,35 @@
+{
+ "name": "E8TEST",
+ "note": "Harness check for E8 (AMENDMENT-7): a program whose only table is filled at run time from simple_switch_CLI commands. Not a registered measurement.",
+ "shuffle_seed": 108,
+ "harness_git": "4d9d4b1",
+ "instances": [
+  {
+   "id": "e8test-cm-default",
+   "build": "cm-default",
+   "program": "e8test",
+   "program_json": "../p4/e8test/e8test.json",
+   "entries_cli": "../p4/e8test/entries.txt",
+   "trials": [
+    {
+     "kind": "sat",
+     "frame": 64,
+     "pps": 0,
+     "burst": 32,
+     "duration": 10
+    }
+   ],
+   "block": 0
+  },
+  {
+   "id": "hit-e8test",
+   "build": "cm-o3-L1-E1",
+   "program": "e8test",
+   "program_json": "../p4/e8test/e8test.json",
+   "entries_cli": "../p4/e8test/entries.txt",
+   "trials": [],
+   "block": 0,
+   "hitcheck": true
+  }
+ ]
+}

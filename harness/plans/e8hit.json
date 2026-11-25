@@ -1,0 +1,41 @@
+{
+ "name": "E8HIT",
+ "shuffle_seed": 110,
+ "harness_git": "8cee917",
+ "instances": [
+  {
+   "id": "hit-e8-C0303",
+   "build": "cm-default",
+   "program": "C0303",
+   "trials": [],
+   "block": 0,
+   "hitcheck": true,
+   "path_profile": "../p4/e8/C0303/PATH.json",
+   "program_json": "../p4/e8/C0303/portknock.p4_16.json",
+   "entries_cli": "../p4/e8/C0303/entries.txt",
+   "gen": {
+    "dst_ip": "10.0.3.10",
+    "src_ip": "10.0.2.10",
+    "tos": 0
+   },
+   "own_frames": true
+  },
+  {
+   "id": "hit-e8-C0272",
+   "build": "cm-default",
+   "program": "C0272",
+   "trials": [],
+   "block": 0,
+   "hitcheck": true,
+   "path_profile": "../p4/e8/C0272/PATH.json",
+   "program_json": "../p4/e8/C0272/gnn.json",
+   "entries_cli": "../p4/e8/C0272/entries.txt",
+   "gen": {
+    "dst_ip": "10.0.1.1",
+    "src_ip": "10.0.2.1",
+    "tos": 2
+   },
+   "own_frames": true
+  }
+ ]
+}

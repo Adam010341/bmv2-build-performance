@@ -1,0 +1,397 @@
+{
+ "name": "X14",
+ "shuffle_seed": 141,
+ "harness_git": "40a97a7",
+ "instances": [
+  {
+   "id": "x14-cm-default-none-r0",
+   "build": "cm-default",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "iperf3-tcp",
+     "duration": 10
+    }
+   ],
+   "block": 0,
+   "runtime": "none"
+  },
+  {
+   "id": "x14-cm-default-none-r1",
+   "build": "cm-default",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "iperf3-tcp",
+     "duration": 10
+    }
+   ],
+   "block": 1,
+   "runtime": "none"
+  },
+  {
+   "id": "x14-cm-default-none-r2",
+   "build": "cm-default",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "iperf3-tcp",
+     "duration": 10
+    }
+   ],
+   "block": 2,
+   "runtime": "none"
+  },
+  {
+   "id": "x14-cm-default-none-r3",
+   "build": "cm-default",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "iperf3-tcp",
+     "duration": 10
+    }
+   ],
+   "block": 3,
+   "runtime": "none"
+  },
+  {
+   "id": "x14-cm-default-none-r4",
+   "build": "cm-default",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "iperf3-tcp",
+     "duration": 10
+    }
+   ],
+   "block": 4,
+   "runtime": "none"
+  },
+  {
+   "id": "x14-cm-default-none-r5",
+   "build": "cm-default",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "iperf3-tcp",
+     "duration": 10
+    }
+   ],
+   "block": 5,
+   "runtime": "none"
+  },
+  {
+   "id": "x14-cm-default-none-r6",
+   "build": "cm-default",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "iperf3-tcp",
+     "duration": 10
+    }
+   ],
+   "block": 6,
+   "runtime": "none"
+  },
+  {
+   "id": "x14-cm-default-none-r7",
+   "build": "cm-default",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "iperf3-tcp",
+     "duration": 10
+    }
+   ],
+   "block": 7,
+   "runtime": "none"
+  },
+  {
+   "id": "x14-cm-default-none-r8",
+   "build": "cm-default",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "iperf3-tcp",
+     "duration": 10
+    }
+   ],
+   "block": 8,
+   "runtime": "none"
+  },
+  {
+   "id": "x14-cm-default-none-r9",
+   "build": "cm-default",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "iperf3-tcp",
+     "duration": 10
+    }
+   ],
+   "block": 9,
+   "runtime": "none"
+  },
+  {
+   "id": "x14-at-docs-perf-none-r0",
+   "build": "at-docs-perf",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "iperf3-tcp",
+     "duration": 10
+    }
+   ],
+   "block": 0,
+   "runtime": "none"
+  },
+  {
+   "id": "x14-at-docs-perf-none-r1",
+   "build": "at-docs-perf",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "iperf3-tcp",
+     "duration": 10
+    }
+   ],
+   "block": 1,
+   "runtime": "none"
+  },
+  {
+   "id": "x14-at-docs-perf-none-r2",
+   "build": "at-docs-perf",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "iperf3-tcp",
+     "duration": 10
+    }
+   ],
+   "block": 2,
+   "runtime": "none"
+  },
+  {
+   "id": "x14-at-docs-perf-none-r3",
+   "build": "at-docs-perf",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "iperf3-tcp",
+     "duration": 10
+    }
+   ],
+   "block": 3,
+   "runtime": "none"
+  },
+  {
+   "id": "x14-at-docs-perf-none-r4",
+   "build": "at-docs-perf",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "iperf3-tcp",
+     "duration": 10
+    }
+   ],
+   "block": 4,
+   "runtime": "none"
+  },
+  {
+   "id": "x14-at-docs-perf-none-r5",
+   "build": "at-docs-perf",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "iperf3-tcp",
+     "duration": 10
+    }
+   ],
+   "block": 5,
+   "runtime": "none"
+  },
+  {
+   "id": "x14-at-docs-perf-none-r6",
+   "build": "at-docs-perf",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "iperf3-tcp",
+     "duration": 10
+    }
+   ],
+   "block": 6,
+   "runtime": "none"
+  },
+  {
+   "id": "x14-at-docs-perf-none-r7",
+   "build": "at-docs-perf",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "iperf3-tcp",
+     "duration": 10
+    }
+   ],
+   "block": 7,
+   "runtime": "none"
+  },
+  {
+   "id": "x14-at-docs-perf-none-r8",
+   "build": "at-docs-perf",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "iperf3-tcp",
+     "duration": 10
+    }
+   ],
+   "block": 8,
+   "runtime": "none"
+  },
+  {
+   "id": "x14-at-docs-perf-none-r9",
+   "build": "at-docs-perf",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "iperf3-tcp",
+     "duration": 10
+    }
+   ],
+   "block": 9,
+   "runtime": "none"
+  },
+  {
+   "id": "x14-at-tutorial-tutorial-r0",
+   "build": "at-tutorial",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "iperf3-tcp",
+     "duration": 10
+    }
+   ],
+   "block": 0,
+   "runtime": "tutorial"
+  },
+  {
+   "id": "x14-at-tutorial-tutorial-r1",
+   "build": "at-tutorial",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "iperf3-tcp",
+     "duration": 10
+    }
+   ],
+   "block": 1,
+   "runtime": "tutorial"
+  },
+  {
+   "id": "x14-at-tutorial-tutorial-r2",
+   "build": "at-tutorial",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "iperf3-tcp",
+     "duration": 10
+    }
+   ],
+   "block": 2,
+   "runtime": "tutorial"
+  },
+  {
+   "id": "x14-at-tutorial-tutorial-r3",
+   "build": "at-tutorial",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "iperf3-tcp",
+     "duration": 10
+    }
+   ],
+   "block": 3,
+   "runtime": "tutorial"
+  },
+  {
+   "id": "x14-at-tutorial-tutorial-r4",
+   "build": "at-tutorial",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "iperf3-tcp",
+     "duration": 10
+    }
+   ],
+   "block": 4,
+   "runtime": "tutorial"
+  },
+  {
+   "id": "x14-at-tutorial-tutorial-r5",
+   "build": "at-tutorial",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "iperf3-tcp",
+     "duration": 10
+    }
+   ],
+   "block": 5,
+   "runtime": "tutorial"
+  },
+  {
+   "id": "x14-at-tutorial-tutorial-r6",
+   "build": "at-tutorial",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "iperf3-tcp",
+     "duration": 10
+    }
+   ],
+   "block": 6,
+   "runtime": "tutorial"
+  },
+  {
+   "id": "x14-at-tutorial-tutorial-r7",
+   "build": "at-tutorial",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "iperf3-tcp",
+     "duration": 10
+    }
+   ],
+   "block": 7,
+   "runtime": "tutorial"
+  },
+  {
+   "id": "x14-at-tutorial-tutorial-r8",
+   "build": "at-tutorial",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "iperf3-tcp",
+     "duration": 10
+    }
+   ],
+   "block": 8,
+   "runtime": "tutorial"
+  },
+  {
+   "id": "x14-at-tutorial-tutorial-r9",
+   "build": "at-tutorial",
+   "program": "l3",
+   "trials": [
+    {
+     "kind": "iperf3-tcp",
+     "duration": 10
+    }
+   ],
+   "block": 9,
+   "runtime": "tutorial"
+  }
+ ]
+}

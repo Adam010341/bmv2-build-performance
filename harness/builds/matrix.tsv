@@ -1,0 +1,22 @@
+# id	system	cflags	options	why
+# --- full factorial: optimisation x logging macros x event logger (CMake, same commit) ---
+cm-o0-L1-E1	cmake	-O0	-DENABLE_LOGGING_MACROS=ON -DENABLE_ELOGGER=ON	factorial
+cm-o0-L1-E0	cmake	-O0	-DENABLE_LOGGING_MACROS=ON -DENABLE_ELOGGER=OFF	factorial
+cm-o0-L0-E1	cmake	-O0	-DENABLE_LOGGING_MACROS=OFF -DENABLE_ELOGGER=ON	factorial
+cm-o0-L0-E0	cmake	-O0	-DENABLE_LOGGING_MACROS=OFF -DENABLE_ELOGGER=OFF	factorial
+cm-o2-L1-E1	cmake	-O2	-DENABLE_LOGGING_MACROS=ON -DENABLE_ELOGGER=ON	factorial
+cm-o2-L1-E0	cmake	-O2	-DENABLE_LOGGING_MACROS=ON -DENABLE_ELOGGER=OFF	factorial
+cm-o2-L0-E1	cmake	-O2	-DENABLE_LOGGING_MACROS=OFF -DENABLE_ELOGGER=ON	factorial
+cm-o2-L0-E0	cmake	-O2	-DENABLE_LOGGING_MACROS=OFF -DENABLE_ELOGGER=OFF	factorial
+cm-o3-L1-E1	cmake	-O3	-DENABLE_LOGGING_MACROS=ON -DENABLE_ELOGGER=ON	factorial
+cm-o3-L1-E0	cmake	-O3	-DENABLE_LOGGING_MACROS=ON -DENABLE_ELOGGER=OFF	factorial
+cm-o3-L0-E1	cmake	-O3	-DENABLE_LOGGING_MACROS=OFF -DENABLE_ELOGGER=ON	factorial
+cm-o3-L0-E0	cmake	-O3	-DENABLE_LOGGING_MACROS=OFF -DENABLE_ELOGGER=OFF	factorial; = docs-recommended flags, CMake
+# --- channel recipes and single-knob extras ---
+cm-default	cmake	-	-	upstream CMake default: no CMAKE_BUILD_TYPE, no flags (Dockerfile.noPI recipe)
+cm-default-dbg	cmake	-	-DENABLE_DEBUGGER=ON	Dockerfile recipe minus PI (debugger on)
+cm-release-L0-E0	cmake	release	-DENABLE_LOGGING_MACROS=OFF -DENABLE_ELOGGER=OFF	CMAKE_BUILD_TYPE=Release (-O3 -DNDEBUG)
+cm-o3native-L0-E0	cmake	-O3 -march=native	-DENABLE_LOGGING_MACROS=OFF -DENABLE_ELOGGER=OFF	machine-specific ISA (old "fast" analogue); not portable
+at-default	autotools	-	--with-thrift	README path: ./configure with no CXXFLAGS (autoconf default -g -O2)
+at-docs-perf	autotools	-g -O3	--with-thrift --disable-logging-macros --disable-elogger	docs/performance.md recommended line; cross-check vs cm-o3-L0-E0
+at-tutorial	autotools	cxx:-O0 -g	--with-thrift	p4lang/tutorials vm-ubuntu-24.04 install-p4dev-v8.sh line 849 minus --with-pi and the python prefix (AMENDMENT-12)

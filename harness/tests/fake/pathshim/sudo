@@ -1,0 +1,10 @@
+#!/bin/bash
+# fake sudo for the dry run, put first on PATH for scripts that hard-code the real wrapper
+# (preround.sh): `sudo -n /usr/local/sbin/bmbench-priv ARGS` runs the fake wrapper; anything else
+# is refused, so nothing in a dry run can reach the real sudo.
+if [[ "${1:-}" == -n && "${2:-}" == /usr/local/sbin/bmbench-priv ]]; then
+    shift 2
+    exec "$(dirname "$(readlink -f "$0")")/../bmbench-priv" "$@"
+fi
+echo "sudo (fake): refusing: $*" >&2
+exit 1
